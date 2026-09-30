@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Smali Patcher Reborn</title>
+<style>
+  :root {
+    --bg:#f4f5f7; --card:#fff; --ink:#15181d; --dim:#5d6673; --line:#e1e4ea;
+    --accent:#2f6df6; --accent-ink:#fff; --ok:#1a8f4c; --warn:#b76e00; --bad:#c62f3a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0f1115; --card:#181b21; --ink:#e8eaee; --dim:#9aa3b0; --line:#272b33; --accent:#6b9bff; --accent-ink:#0b1020; --ok:#4cc585; --warn:#e3a03a; --bad:#ff7a84; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.45 system-ui, sans-serif; padding:16px 16px 40px; max-width:640px; margin-inline:auto; }
+  h1 { font-size:20px; margin:4px 0 2px; }
+  .sub { color:var(--dim); font-size:13px; margin-bottom:16px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:14px; }
+  .card h2 { font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--dim); margin:0 0 10px; font-weight:600; }
+  .row { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 0; border-top:1px solid var(--line); }
+  .row:first-of-type { border-top:0; padding-top:0; }
+  .row b { display:block; font-weight:600; }
+  .row small { color:var(--dim); }
+  .kv { display:grid; grid-template-columns:auto 1fr; gap:4px 12px; font-size:13px; }
+  .kv span:nth-child(odd) { color:var(--dim); }
+  .kv span:nth-child(even) { word-break:break-all; }
+  .pill { display:inline-block; padding:1px 9px; border-radius:99px; font-size:12px; font-weight:600; border:1px solid currentColor; }
+  .ok { color:var(--ok); } .warn { color:var(--warn); } .bad { color:var(--bad); }
+  input[type=checkbox] { appearance:none; width:46px; height:26px; border-radius:99px; background:var(--line); position:relative; flex:none; transition:background .15s; cursor:pointer; }
+  input[type=checkbox]::after { content:""; position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:#fff; transition:transform .15s; }
+  input[type=checkbox]:checked { background:var(--accent); }
+  input[type=checkbox]:checked::after { transform:translateX(20px); }
+  button { font:inherit; font-weight:600; border:0; border-radius:10px; padding:11px 16px; background:var(--accent); color:var(--accent-ink); cursor:pointer; }
+  button.ghost { background:transparent; color:var(--accent); border:1px solid var(--line); }
+  button:disabled { opacity:.5; cursor:default; }
+  .actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+  pre { margin:10px 0 0; padding:10px; border-radius:10px; background:var(--bg); border:1px solid var(--line); font:12px/1.4 ui-monospace, monospace; max-height:220px; overflow:auto; white-space:pre-wrap; word-break:break-all; }
+  .note { font-size:13px; color:var(--dim); margin-top:10px; }
+  .banner { padding:10px 12px; border-radius:10px; font-size:13px; margin-bottom:14px; border:1px solid var(--warn); color:var(--warn); }
+  [hidden] { display:none !important; }
+</style>
+</head>
+<body>
+<h1>Smali Patcher Reborn</h1>
+<div class="sub">Patches the framework on this device. Changes take effect after a reboot.</div>
+
+<div id="devbanner" class="banner" hidden>Preview mode: no root manager detected, showing sample data.</div>
+
+<div class="card">
+  <h2>Status</h2>
+  <div class="kv" id="status"></div>
+</div>
+
+<div class="card">
+  <h2>Patches</h2>
+  <div id="patches"></div>
+  <div class="actions">
+    <button id="apply">Save &amp; re-patch</button>
+    <button id="reload" class="ghost">Reload</button>
+  </div>
+  <div class="note" id="applyNote">Re-patching rebuilds services.jar from your current ROM. Reboot afterwards.</div>
+  <pre id="out" hidden></pre>
+</div>
+
+<div class="card">
+  <h2>Safety</h2>
+  <div class="note" style="margin-top:0">If the device fails to finish booting three times in a row, the module disables itself. After a ROM update it also disables itself until you re-patch.</div>
+  <pre id="guard" hidden></pre>
+  <div class="actions">
+    <button id="showlog" class="ghost">Last patch log</button>
+    <button id="reboot" class="ghost">Reboot</button>
+  </div>
+  <pre id="log" hidden></pre>
+</div>
+
+<script>
+const MOD  = '/data/adb/modules/smalipatcher_reborn';
+const CFG  = '/data/adb/smalipatcher';
+const INFO = {
+  'mock-hide':       ['Hide mock-location flag',            'Apps that check Location.isMock() see a normal location.'],
+  'mock-permission': ['Mock apps without developer setting','Test providers work without picking a "mock location app".'],
+  'secure-flag':     ['Allow screenshots in secure windows','Ignores FLAG_SECURE for capture and screen recording.'],
+};
+
+// ---- shell bridge: KernelSU / APatch / WebUI-X inject window.ksu; otherwise run in preview mode ----
+const preview = typeof ksu === 'undefined';
+const fake = { conf:'mock-hide=1\nmock-permission=1\nsecure-flag=0\n', applied:'mock-hide,mock-permission\n' };
+function sh(cmd) {
+  if (preview) return Promise.resolve(previewShell(cmd));
+  return new Promise(res => {
+    const cb = 'cb_' + Math.random().toString(36).slice(2);
+    window[cb] = (code, out, err) => { delete window[cb]; res({ code, out: out || '', err: err || '' }); };
+    ksu.exec(cmd, '{}', cb);
+  });
+}
+function previewShell(cmd) {
+  const o = s => ({ code:0, out:s, err:'' });
+  if (cmd.includes('patches.conf') && cmd.startsWith('cat')) return o(fake.conf);
+  if (cmd.includes('printf')) { fake.conf = cmd.match(/printf '%s' '([\s\S]*?)' >/)[1]; return o(''); }
+  if (cmd.includes('patches.applied')) return o(fake.applied);
+  if (cmd.includes('getprop ro.build.version.release')) return o('16');
+  if (cmd.includes('getprop ro.build.version.sdk')) return o('36');
+  if (cmd.includes('getprop ro.build.fingerprint')) return o('google/sample/device:16/BE2A.250530.026/1:user/release-keys');
+  if (cmd.includes('fingerprint') && cmd.startsWith('cat')) return o('google/sample/device:16/BE2A.250530.026/1:user/release-keys');
+  if (cmd.includes('repatch.sh')) return o('Patches: ' + fake.conf.split('\n').filter(l => l.endsWith('=1')).map(l => l.split('=')[0]).join(',') + '\n- Patching...\n  OK\nDone. Reboot to apply.');
+  if (cmd.includes('boot_count')) return o('0');
+  if (cmd.includes('guard.log')) return o('');
+  if (cmd.includes('last-patch.log')) return o('hits: {mock-hide/MockLocationProvider=1, ...}\nOK');
+  if (cmd.includes('disable')) return o('active');
+  return o('');
+}
+
+const $ = id => document.getElementById(id);
+let conf = {};
+
+function parseConf(t) { const c = {}; t.split('\n').forEach(l => { const m = l.match(/^([\w-]+)=(\d)$/); if (m) c[m[1]] = m[2] === '1'; }); return c; }
+function confText() { return Object.keys(INFO).map(k => k + '=' + ($('p_' + k).checked ? 1 : 0)).join('\n') + '\n'; }
+
+async function load() {
+  $('devbanner').hidden = !preview;
+  const [rel, api, fp, fpMod, applied, boot, disabled, guard, confRaw] = await Promise.all([
+    sh('getprop ro.build.version.release'), sh('getprop ro.build.version.sdk'), sh('getprop ro.build.fingerprint'),
+    sh('cat ' + MOD + '/fingerprint 2>/dev/null'), sh('cat ' + MOD + '/patches.applied 2>/dev/null'),
+    sh('cat ' + CFG + '/boot_count 2>/dev/null'),
+    sh('[ -f ' + MOD + '/disable ] && echo disabled || { [ -d ' + MOD + '/system ] && echo active || echo nosystem; }'),
+    sh('cat ' + CFG + '/guard.log 2>/dev/null'), sh('cat ' + CFG + '/patches.conf 2>/dev/null'),
+  ]);
+  const same = fp.out.trim() === fpMod.out.trim() && fpMod.out.trim() !== '';
+  const st = disabled.out.trim();
+  const stateHtml = st === 'active' && same ? '<span class="pill ok">active</span>'
+                  : st === 'disabled' ? '<span class="pill bad">disabled</span>'
+                  : !same ? '<span class="pill warn">needs re-patch (ROM changed)</span>' : '<span class="pill warn">not patched</span>';
+  $('status').innerHTML =
+    '<span>State</span><span>' + stateHtml + '</span>' +
+    '<span>Android</span><span>' + rel.out.trim() + ' (API ' + api.out.trim() + ')</span>' +
+    '<span>Applied</span><span>' + (applied.out.trim() || 'none') + '</span>' +
+    '<span>Boot counter</span><span>' + (boot.out.trim() || '0') + '</span>';
+  const g = guard.out.trim();
+  $('guard').hidden = !g; $('guard').textContent = g;
+
+  conf = parseConf(confRaw.out);
+  $('patches').innerHTML = Object.entries(INFO).map(([k, [t, d]]) =>
+    '<label class="row"><span><b>' + t + '</b><small>' + d + '</small></span><input type="checkbox" id="p_' + k + '"' + (conf[k] ? ' checked' : '') + '></label>').join('');
+}
+
+$('apply').onclick = async () => {
+  const b = $('apply'); b.disabled = true; b.textContent = 'Patching...';
+  $('out').hidden = false; $('out').textContent = 'Working...';
+  const w = await sh("printf '%s' '" + confText() + "' > " + CFG + '/patches.conf');
+  const r = await sh('sh ' + MOD + '/repatch.sh 2>&1');
+  $('out').textContent = (r.out + r.err).trim() || '(no output)';
+  b.disabled = false; b.textContent = 'Save & re-patch';
+  load();
+};
+$('reload').onclick = load;
+$('showlog').onclick = async () => { const r = await sh('tail -n 40 ' + CFG + '/last-patch.log'); $('log').hidden = false; $('log').textContent = r.out.trim() || '(empty)'; };
+$('reboot').onclick = () => { if (confirm('Reboot now?')) sh('svc power reboot || reboot'); };
+load();
+</script>
+<div class="note" style="text-align:center;margin-top:8px">By <b>saadnahid7</b> · <a href="https://droidrooter.com" style="color:var(--accent)">droidrooter.com</a> · <a href="https://github.com/saadnahid7/SmaliPatcherReborn" style="color:var(--accent)">GitHub</a><br>Thanks to <b>fOmey</b> (original Smali Patcher) and <b>sabpprook</b> (SmaliPatcherEx)</div>
+</body>
+</html>

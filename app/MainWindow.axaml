@@ -1,0 +1,134 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="SmaliPatcherReborn.MainWindow"
+        Title="Smali Patcher Reborn" Icon="avares://SmaliPatcherReborn/Assets/icon.png"
+        Width="940" Height="760" MinWidth="720" MinHeight="600"
+        Background="{DynamicResource WindowBg}">
+  <DockPanel>
+    <Border DockPanel.Dock="Top" Background="#00796B" Padding="24,14">
+      <Grid ColumnDefinitions="Auto,*">
+        <Image Source="avares://SmaliPatcherReborn/Assets/icon.png" Width="44" Height="44" Margin="0,0,14,0" />
+        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
+          <TextBlock Text="Smali Patcher Reborn" FontSize="22" FontWeight="SemiBold" Foreground="White" />
+          <TextBlock Name="AdbInfo" FontSize="12" Foreground="#B2DFDB" Text="Looking for adb..." />
+        </StackPanel>
+      </Grid>
+    </Border>
+  <ScrollViewer>
+    <StackPanel Margin="24,20,24,24" Spacing="14" MaxWidth="900">
+
+      <!-- device -->
+      <Border Classes="card">
+        <StackPanel Spacing="10">
+          <TextBlock Classes="h" Text="DEVICE" />
+          <Grid ColumnDefinitions="*,Auto">
+            <ComboBox Name="DeviceBox" Margin="0,0,8,0" HorizontalAlignment="Stretch" PlaceholderText="No device connected" />
+            <Button Name="RefreshBtn" Grid.Column="1" Content="Refresh" />
+          </Grid>
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBox Name="WifiBox" Margin="0,0,8,0" Watermark="Wireless debugging: 192.168.1.20:5555" />
+            <Button Name="ConnectBtn" Grid.Column="1" Content="Connect" />
+          </Grid>
+          <Border Height="1" Background="{DynamicResource CardLine}" Margin="0,4" />
+          <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" Name="InfoGrid">
+            <TextBlock Grid.Row="0" Classes="dim" Margin="0,0,16,5" Text="Device" />        <TextBlock Grid.Row="0" Grid.Column="1" Name="LDevice" TextWrapping="Wrap" />
+            <TextBlock Grid.Row="1" Classes="dim" Margin="0,0,16,5" Text="Android" />       <TextBlock Grid.Row="1" Grid.Column="1" Name="LAndroid" />
+            <TextBlock Grid.Row="2" Classes="dim" Margin="0,0,16,5" Text="Root" />          <TextBlock Grid.Row="2" Grid.Column="1" Name="LRoot" TextWrapping="Wrap" />
+            <TextBlock Grid.Row="3" Classes="dim" Margin="0,0,16,5" Text="Framework" />     <TextBlock Grid.Row="3" Grid.Column="1" Name="LJar" TextWrapping="Wrap" />
+            <TextBlock Grid.Row="4" Classes="dim" Margin="0,0,16,5" Text="Module" />        <TextBlock Grid.Row="4" Grid.Column="1" Name="LModule" TextWrapping="Wrap" />
+            <TextBlock Grid.Row="5" Classes="dim" Margin="0,0,16,5" Text="Build" />         <TextBlock Grid.Row="5" Grid.Column="1" Name="LBuild" TextWrapping="Wrap" FontSize="12" Opacity="0.8" />
+          </Grid>
+        </StackPanel>
+      </Border>
+
+      <!-- patches -->
+      <Border Classes="card">
+        <StackPanel Spacing="10">
+          <TextBlock Classes="h" Text="PATCHES" />
+          <StackPanel Name="PatchList" Spacing="12" />
+          <TextBlock Classes="dim" Text="The module patches your phone's own framework when it installs, so it always matches your ROM. Changes take effect after a reboot." />
+        </StackPanel>
+      </Border>
+
+      <!-- actions -->
+      <Border Classes="card">
+        <StackPanel Spacing="10">
+          <TextBlock Classes="h" Text="ACTIONS" />
+          <WrapPanel Orientation="Horizontal">
+            <Button Name="InstallBtn" Content="Install / update module" Classes="accent" Margin="0,0,8,8" />
+            <Button Name="UninstallBtn" Content="Uninstall" Margin="0,0,8,8" />
+            <Button Name="ToggleBtn" Content="Disable" Margin="0,0,8,8" />
+            <Button Name="RebootBtn" Content="Reboot phone" Margin="0,0,8,8" />
+            <Button Name="ExportBtn" Content="Save module zip..." Margin="0,0,8,8" />
+            <Button Name="LogBtn" Content="Show patch log" Margin="0,0,8,8" />
+          </WrapPanel>
+          <ProgressBar Name="Busy" IsIndeterminate="True" IsVisible="False" />
+        </StackPanel>
+      </Border>
+
+      <!-- log -->
+      <Border Classes="card">
+        <StackPanel Spacing="8">
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Classes="h" Text="LOG" />
+            <Button Name="ClearBtn" Grid.Column="1" Content="Clear" Padding="8,2" FontSize="12" />
+          </Grid>
+          <TextBox Name="LogBox" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" Height="200"
+                   FontFamily="Consolas,Menlo,DejaVu Sans Mono,monospace" FontSize="12" Foreground="White"
+                   Background="{DynamicResource LogBg}" />
+        </StackPanel>
+      </Border>
+
+      <!-- about -->
+      <Border Classes="card">
+        <StackPanel Spacing="14">
+          <TextBlock Classes="h" Text="ABOUT" Margin="0" />
+          <Grid ColumnDefinitions="Auto,*">
+            <Border Width="56" Height="56" CornerRadius="14" ClipToBounds="True" Margin="0,0,14,0">
+              <Image Source="avares://SmaliPatcherReborn/Assets/icon.png" Stretch="UniformToFill" />
+            </Border>
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+              <TextBlock Text="Smali Patcher Reborn" FontSize="18" FontWeight="SemiBold" />
+              <TextBlock Name="VersionText" Classes="dim" Text="Version" />
+              <TextBlock Classes="dim" Text="Patches your phone's own framework, on the phone. Android 10 - 17." />
+            </StackPanel>
+          </Grid>
+
+          <Border Height="1" Background="{DynamicResource CardLine}" />
+
+          <Grid ColumnDefinitions="130,*,Auto" RowDefinitions="Auto,Auto,Auto">
+            <TextBlock Grid.Row="0" Classes="dim" Text="Maintained by" VerticalAlignment="Center" Margin="0,4" />
+            <StackPanel Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Margin="0,4">
+              <TextBlock Text="saadnahid7" FontWeight="SemiBold" />
+              <TextBlock Classes="dim" Text="droidrooter.com" />
+            </StackPanel>
+            <Button Name="AuthorBtn" Grid.Row="0" Grid.Column="2" Classes="link" Content="GitHub profile" />
+
+            <TextBlock Grid.Row="1" Classes="dim" Text="Original idea" VerticalAlignment="Center" Margin="0,4" />
+            <StackPanel Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Margin="0,4">
+              <TextBlock Text="fOmey" FontWeight="SemiBold" />
+              <TextBlock Classes="dim" Text="Created Smali Patcher, the first framework patcher that used your own device's files" />
+            </StackPanel>
+            <Button Name="OrigBtn" Grid.Row="1" Grid.Column="2" Classes="link" Content="XDA thread" />
+
+            <TextBlock Grid.Row="2" Classes="dim" Text="Carried forward" VerticalAlignment="Center" Margin="0,4" />
+            <StackPanel Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" Margin="0,4">
+              <TextBlock Text="sabpprook" FontWeight="SemiBold" />
+              <TextBlock Classes="dim" Text="Updated it as SmaliPatcherEx with mock-location support for Android 11 - 14" />
+            </StackPanel>
+            <Button Name="ExBtn" Grid.Row="2" Grid.Column="2" Classes="link" Content="XDA thread" />
+          </Grid>
+
+          <Border Height="1" Background="{DynamicResource CardLine}" />
+
+          <WrapPanel Orientation="Horizontal">
+            <Button Name="SiteBtn" Content="droidrooter.com" Classes="accent" Margin="0,0,8,0" />
+            <Button Name="RepoBtn" Content="Project on GitHub" Margin="0,0,8,0" />
+          </WrapPanel>
+          <TextBlock Classes="dim" Text="Thank you to fOmey and sabpprook. This is a new implementation built on their idea; it is not affiliated with XDA Developers. MIT licence. Use at your own risk." />
+        </StackPanel>
+      </Border>
+    </StackPanel>
+  </ScrollViewer>
+  </DockPanel>
+</Window>

@@ -1,0 +1,7 @@
+id=smalipatcher_reborn
+name=Smali Patcher Reborn
+version=v0.2.0-dev
+versionCode=200
+author=saadnahid7 (thanks to fOmey and sabpprook)
+description=Patches your own services.jar on the device at install time: hide mock location, mock without mock-app permission, allow screenshots in secure windows. Android 10 - 17.
+

@@ -1,0 +1,5 @@
+*.sh text eol=lf
+update-binary text eol=lf
+module.prop text eol=lf
+*.ps1 text eol=crlf
+* text=auto

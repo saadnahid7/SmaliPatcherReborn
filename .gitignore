@@ -1,0 +1,37 @@
+# Third-party code we analysed but do not redistribute
+decompiled/
+SmaliPatcherEx-*/
+
+# Local lab data, downloads and release output
+lab/
+release/
+docs/ANALYSIS.md
+ANALYSIS.md
+
+# Build output
+reborn/build/
+reborn/libs/
+reborn/testapp/build/
+app/bin/
+app/obj/
+app/dist/
+app/cache/
+app/Assets/module.zip
+app/Assets/platform-tools-*.zip
+
+# Machine-specific emulator test harness
+reborn/scripts/lab*.ps1
+reborn/scripts/secure-test.ps1
+reborn/scripts/collect-corpus.ps1
+reborn/scripts/test-corpus.ps1
+reborn/scripts/build-testapp.ps1
+reborn/scripts/device-test.sh
+reborn/scripts/prep.sh
+reborn/scripts/cleanup.sh
+reborn/scripts/install.sh
+
+# Misc
+.vs/
+.idea/
+*.user
+*.log

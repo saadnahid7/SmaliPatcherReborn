@@ -1,0 +1,78 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="SmaliPatcherReborn.App"
+             RequestedThemeVariant="Default">
+  <Application.Styles>
+    <FluentTheme />
+    <Style Selector="Border.card">
+      <Setter Property="Background" Value="{DynamicResource CardBg}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource CardLine}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="12" />
+      <Setter Property="Padding" Value="16,14" />
+    </Style>
+    <Style Selector="TextBlock.h">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="{DynamicResource Primary}" />
+      <Setter Property="Margin" Value="0,0,0,8" />
+    </Style>
+    <Style Selector="Button.accent">
+      <Setter Property="Background" Value="{DynamicResource Primary}" />
+      <Setter Property="Foreground" Value="White" />
+    </Style>
+    <Style Selector="Button.accent:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#00695C" />
+      <Setter Property="TextElement.Foreground" Value="White" />
+    </Style>
+    <Style Selector="Button.link">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Foreground" Value="{DynamicResource LinkBrush}" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Padding" Value="10,4" />
+    </Style>
+    <Style Selector="Button.link:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#1A00796B" />
+      <Setter Property="TextElement.Foreground" Value="{DynamicResource LinkBrush}" />
+    </Style>
+    <Style Selector="ProgressBar">
+      <Setter Property="Foreground" Value="{DynamicResource AccentAmber}" />
+    </Style>
+    <Style Selector="TextBlock.dim">
+      <Setter Property="Opacity" Value="0.65" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+  </Application.Styles>
+  <Application.Resources>
+    <ResourceDictionary>
+      <!-- Material teal from the original SmaliPatcherEx: primary #00796B, dark #004D40, accent #FFAB00 -->
+      <Color x:Key="SystemAccentColor">#00796B</Color>
+      <Color x:Key="SystemAccentColorDark1">#00695C</Color>
+      <Color x:Key="SystemAccentColorDark2">#004D40</Color>
+      <Color x:Key="SystemAccentColorDark3">#00352C</Color>
+      <Color x:Key="SystemAccentColorLight1">#26A69A</Color>
+      <Color x:Key="SystemAccentColorLight2">#4DB6AC</Color>
+      <Color x:Key="SystemAccentColorLight3">#80CBC4</Color>
+      <SolidColorBrush x:Key="Primary">#00796B</SolidColorBrush>
+      <SolidColorBrush x:Key="PrimaryDark">#004D40</SolidColorBrush>
+      <SolidColorBrush x:Key="AccentAmber">#FFAB00</SolidColorBrush>
+      <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+          <SolidColorBrush x:Key="WindowBg">#F5F5F5</SolidColorBrush>
+          <SolidColorBrush x:Key="CardBg">#FFFFFF</SolidColorBrush>
+          <SolidColorBrush x:Key="CardLine">#E1E4EA</SolidColorBrush>
+          <SolidColorBrush x:Key="LogBg">#2F4F4F</SolidColorBrush>
+          <SolidColorBrush x:Key="LinkBrush">#00796B</SolidColorBrush>
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+          <SolidColorBrush x:Key="WindowBg">#0E1615</SolidColorBrush>
+          <SolidColorBrush x:Key="CardBg">#16211F</SolidColorBrush>
+          <SolidColorBrush x:Key="CardLine">#27403C</SolidColorBrush>
+          <SolidColorBrush x:Key="LogBg">#2F4F4F</SolidColorBrush>
+          <SolidColorBrush x:Key="LinkBrush">#4DB6AC</SolidColorBrush>
+        </ResourceDictionary>
+      </ResourceDictionary.ThemeDictionaries>
+    </ResourceDictionary>
+  </Application.Resources>
+</Application>
