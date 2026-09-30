@@ -4,7 +4,11 @@ Patch your phone's own Android framework **on the phone**, as a Magisk / KernelS
 
 A desktop app (Windows, Linux, macOS) installs and manages it. The module can also be flashed on its own with no PC.
 
-> **Status: 0.2.0-dev, pre-release.** Tested on Android emulators (below). Not yet tested on a physical phone. Read [Safety](#safety) first.
+> **Status: 0.3.0-dev, early release.** Tested on Android emulators (below). Not yet tested on a physical phone. Read [Safety](#safety) first.
+
+![Smali Patcher Reborn desktop app](docs/img/app-main.png)
+
+*The desktop app on an Android 16 emulator: device details, patch switches, one-click install and the patch log.*
 
 ## What it does
 
@@ -32,8 +36,6 @@ Every patch step is matched by class and method **descriptors** (not text), and 
 | 10 | 29 | patches a real `services.jar` on the PC; not device-tested | – | – |
 | 9 and older | ≤ 28 | ❌ not supported | | |
 
-All results are from Google-API emulators with Magisk 30.7. **Not yet verified:** physical devices, KernelSU, APatch, the volume-key menu, and the WebUI inside a real root manager.
-
 ROMs that ship a *stripped* `services.jar` (code only in odex/vdex) are not supported yet; the installer detects this and changes nothing.
 
 ## Quick start
@@ -46,6 +48,16 @@ ROMs that ship a *stripped* `services.jar` (code only in odex/vdex) are not supp
 
 The app is a single file. It uses the `adb` already on your PC, otherwise a built-in copy.
 With several devices connected, nothing is read until you choose one.
+
+### Manual jar patch (no phone connected)
+
+Copy `system/framework` (or just `services.jar`) off a phone, then use **Manual jar patch** in the app: pick the folder or file, choose the Android version (auto-detected when a `build.prop` is next to it) and press **Patch and build module**. A ready-to-flash module is written **into the same folder**.
+
+```
+SmaliPatcherReborn manual --in <system/framework or services.jar> [--api 34] [--patches mock-hide,mock-permission]
+```
+
+The module stores the SHA-256 of the original jar and **refuses to install on a phone with a different `services.jar`**, so a module made for another ROM or build can't be flashed by mistake. This mode needs Java 17+ on your computer (the on-device modes don't).
 
 ### Phone only
 
@@ -102,6 +114,7 @@ Requirements: JDK 17+ (`JAVA_HOME`), Android SDK with build-tools (`ANDROID_HOME
 # 1. the module (engine + scripts)
 cd reborn
 scripts\fetch-libs.ps1
+scripts\pcjar.ps1                # JVM engine used by manual jar patching
 scripts\dex.ps1
 scripts\make-module.ps1          # -> build\SmaliPatcherReborn-<version>.zip
 
@@ -111,11 +124,11 @@ cd ..\app
 .\publish.ps1 -Rids win-x64,linux-x64,osx-arm64,osx-x64
 ```
 
-Layout: `reborn/src` engine, `reborn/module` Magisk/KSU/APatch module + WebUI, `reborn/testapp` FLAG_SECURE test app, `app` Avalonia desktop app.
+Layout: `update.json` module update feed, `reborn/src` engine, `reborn/module` Magisk/KSU/APatch module + WebUI, `reborn/testapp` FLAG_SECURE test app, `app` Avalonia desktop app.
 
 ## Roadmap
 
-- Stripped-jar support (extract code from odex/vdex)
+- Stripped-jar support (extract code from odex/vdex), also for manual mode
 - KernelSU / APatch re-patch without the original jar mirror
 - Optional patches: reboot-to-recovery in power menu, high-volume warning, hide the mock-app developer setting, screen-recording detection callbacks
 - Physical-device and KernelSU/APatch verification

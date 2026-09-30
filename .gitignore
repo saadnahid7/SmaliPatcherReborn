@@ -17,6 +17,7 @@ app/obj/
 app/dist/
 app/cache/
 app/Assets/module.zip
+app/Assets/engine-pc.jar
 app/Assets/platform-tools-*.zip
 
 # Machine-specific emulator test harness

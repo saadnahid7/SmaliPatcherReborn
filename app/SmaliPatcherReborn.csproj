@@ -9,7 +9,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon Condition="Exists('Assets/app.ico')">Assets/app.ico</ApplicationIcon>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-    <Version>0.2.0</Version>
+    <Version>0.3.0</Version>
     <InvariantGlobalization>true</InvariantGlobalization>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>
@@ -28,6 +28,7 @@
   <!-- The module (which contains the on-device patch engine) and a fallback adb travel inside the executable. -->
   <ItemGroup>
     <EmbeddedResource Include="Assets/module.zip" LogicalName="module.zip" />
+    <EmbeddedResource Include="Assets/engine-pc.jar" LogicalName="engine-pc.jar" />
     <!-- PtOs = windows | linux | darwin, set by publish.ps1 -->
     <EmbeddedResource Include="cache/platform-tools-$(PtOs).zip" LogicalName="platform-tools-$(PtOs).zip" Condition="'$(PtOs)' != '' And Exists('cache/platform-tools-$(PtOs).zip')" />
   </ItemGroup>

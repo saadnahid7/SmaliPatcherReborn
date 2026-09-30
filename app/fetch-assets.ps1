@@ -9,4 +9,7 @@ foreach ($p in 'windows', 'linux', 'darwin') {
 $m = Get-ChildItem "$a\..\reborn\build\SmaliPatcherReborn-*.zip" | Sort-Object LastWriteTime | Select-Object -Last 1
 if (-not $m) { throw 'Build the module first: reborn\scripts\fetch-libs.ps1, dex.ps1, make-module.ps1' }
 Copy-Item $m.FullName "$a\Assets\module.zip" -Force
+$e = "$a\..ebornuild\dist\engine-pc.jar"
+if (-not (Test-Path $e)) { throw 'Build the PC engine first: reborn\scripts\pcjar.ps1' }
+Copy-Item $e "$a\Assets\engine-pc.jar" -Force
 "assets ready"

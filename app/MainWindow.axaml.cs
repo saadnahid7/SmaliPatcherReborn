@@ -17,6 +17,7 @@ public partial class MainWindow : Window
     bool _busy;
     bool _updatingBox;
     bool _autoDone;
+    string? _manualOut;
 
     public MainWindow()
     {
@@ -24,6 +25,15 @@ public partial class MainWindow : Window
         BuildPatchList();
         Wire();
         Opened += async (_, _) => await Startup();
+        Opened += (_, _) =>   // test hook: fixed size/position for README screenshots
+        {
+            if (Environment.GetEnvironmentVariable("SPR_SHOT") == "1") { WindowState = WindowState.Normal; Width = 980; Height = 1000; Position = new PixelPoint(20, 5); Topmost = true; }
+        };
+        Opened += (_, _) =>   // test hook: run the manual patch on a given path without clicking
+        {
+            var p = Environment.GetEnvironmentVariable("SPR_AUTOMANUAL");
+            if (!string.IsNullOrEmpty(p)) DispatcherTimer.RunOnce(async () => { C<TextBox>("ManualPath").Text = p; await DoManual(); }, TimeSpan.FromSeconds(4));
+        };
     }
 
     void AvaloniaXamlLoader_Load() => Avalonia.Markup.Xaml.AvaloniaXamlLoader.Load(this);
@@ -59,6 +69,13 @@ public partial class MainWindow : Window
         C<Button>("RebootBtn").Click += async (_, _) => await DoReboot();
         C<Button>("ExportBtn").Click += async (_, _) => await DoExport();
         C<Button>("LogBtn").Click += async (_, _) => await DoShowLog();
+        var apiBox = C<ComboBox>("ManualApi");
+        apiBox.ItemsSource = ManualPatch.AndroidVersions.Select(v => v.Label).ToList();
+        apiBox.SelectedIndex = 0;
+        C<Button>("ManualFolderBtn").Click += async (_, _) => await PickManual(folder: true);
+        C<Button>("ManualFileBtn").Click += async (_, _) => await PickManual(folder: false);
+        C<Button>("ManualGoBtn").Click += async (_, _) => await DoManual();
+        C<Button>("ManualOpenBtn").Click += (_, _) => { if (_manualOut != null) About.Open(System.IO.Path.GetDirectoryName(_manualOut)!); };
         C<Button>("ClearBtn").Click += (_, _) => C<TextBox>("LogBox").Text = "";
         var ver = typeof(MainWindow).Assembly.GetName().Version;
         C<TextBlock>("VersionText").Text = $"Version {ver?.Major}.{ver?.Minor}.{ver?.Build}-dev";
@@ -182,6 +199,8 @@ public partial class MainWindow : Window
         var st = await Task.Run(() => session.ReadStatus());
         _session = session; _status = st;
         ShowStatus(dev, st);
+        if (Environment.GetEnvironmentVariable("SPR_AUTOLOG") == "1" && st.Serial.StartsWith("emulator-") && !_autoDone)
+        { _autoDone = true; DispatcherTimer.RunOnce(async () => { _busy = false; await DoShowLog(); }, TimeSpan.FromSeconds(1)); }   // test hook, emulators only
         if (Environment.GetEnvironmentVariable("SPR_AUTOINSTALL") == "1" && st.Serial.StartsWith("emulator-") && !_autoDone)
         { _autoDone = true; DispatcherTimer.RunOnce(async () => { _busy = false; await DoInstall(); }, TimeSpan.FromSeconds(1)); }   // test hook, emulators only
         if (st.Api > 0 && st.ModuleInstalled)
@@ -302,5 +321,37 @@ public partial class MainWindow : Window
     {
         if (_session == null) return;
         await Work(async () => Log(await Task.Run(() => _session.ReadPatchLog())));
+    }
+
+    async Task PickManual(bool folder)
+    {
+        string? path = null;
+        if (folder)
+        {
+            var r = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions { Title = "Select the system/framework folder copied from the phone" });
+            path = r.FirstOrDefault()?.TryGetLocalPath();
+        }
+        else
+        {
+            var r = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions { Title = "Select services.jar", AllowMultiple = false });
+            path = r.FirstOrDefault()?.TryGetLocalPath();
+        }
+        if (path != null) C<TextBox>("ManualPath").Text = path;
+    }
+
+    async Task DoManual()
+    {
+        var path = C<TextBox>("ManualPath").Text?.Trim() ?? "";
+        if (path.Length == 0) { Log("Choose a system/framework folder or a services.jar first."); return; }
+        // read every control here, on the UI thread, before the background work starts
+        var api = ManualPatch.AndroidVersions[Math.Max(0, C<ComboBox>("ManualApi").SelectedIndex)].Api;
+        var chosen = SelectedPatches().ToList();
+        await Work(async () =>
+        {
+            var res = await Task.Run(() => ManualPatch.Run(path, api, chosen, Log));
+            Log(res.Message);
+            _manualOut = res.ZipPath;
+            C<Button>("ManualOpenBtn").IsVisible = res.Ok;
+        });
     }
 }

@@ -47,6 +47,25 @@ find_source() {
   return 0
 }
 
+
+# Placeholders for stale AOT artifacts, plus the files the boot-time guards rely on.
+finish_module() {
+  local patches="$1" out="$MODPATH/system/framework/services.jar" fp f
+  fp=$(getprop ro.build.fingerprint)
+  # stale ahead-of-time artifacts of the original jar must not be used with the patched one
+  for f in /system/framework/services.jar.prof /system/framework/services.jar.bprof            /system/framework/services.jar.fsv_meta            /system/framework/oat/*/services.odex /system/framework/oat/*/services.vdex /system/framework/oat/*/services.art            /system/framework/oat/*/services.odex.fsv_meta /system/framework/oat/*/services.vdex.fsv_meta; do
+    [ -f "$f" ] || continue
+    mkdir -p "$MODPATH$(dirname "$f")"
+    : > "$MODPATH$f"
+  done
+  echo "$fp" > "$MODPATH/fingerprint"
+  echo "$patches" > "$MODPATH/patches.applied"
+  sha256sum "$out" | cut -d' ' -f1 > "$MODPATH/patched.sha256"
+  mkdir -p "$CFG"
+  echo 0 > "$CFG/boot_count"
+  return 0
+}
+
 # run_patch <csv patches>  -> writes $MODPATH/system/framework/services.jar
 run_patch() {
   local patches="$1" api fp out log rc
@@ -69,20 +88,6 @@ run_patch() {
   fi
   mv -f "$out.new" "$out"
 
-  # stale ahead-of-time artifacts of the original jar must not be used with the patched one
-  local f
-  for f in /system/framework/services.jar.prof /system/framework/services.jar.bprof \
-           /system/framework/services.jar.fsv_meta \
-           /system/framework/oat/*/services.odex /system/framework/oat/*/services.vdex /system/framework/oat/*/services.art \
-           /system/framework/oat/*/services.odex.fsv_meta /system/framework/oat/*/services.vdex.fsv_meta; do
-    [ -f "$f" ] || continue
-    mkdir -p "$MODPATH$(dirname "$f")"
-    : > "$MODPATH$f"
-  done
-
-  echo "$fp" > "$MODPATH/fingerprint"
-  echo "$patches" > "$MODPATH/patches.applied"
-  sha256sum "$out" | cut -d' ' -f1 > "$MODPATH/patched.sha256"
-  echo 0 > "$CFG/boot_count"
+  finish_module "$patches" || return 1
   return 0
 }

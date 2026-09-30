@@ -79,6 +79,25 @@
         </StackPanel>
       </Border>
 
+      <!-- manual -->
+      <Border Classes="card">
+        <StackPanel Spacing="10">
+          <TextBlock Classes="h" Text="MANUAL JAR PATCH" Margin="0" />
+          <TextBlock Classes="dim" Text="No phone connected? Copy system/framework off a phone (or just services.jar), pick it here, and a ready-to-flash module is written into that same folder. It only installs on a phone whose services.jar is identical. Needs Java 17+ on this computer." />
+          <Grid ColumnDefinitions="*,Auto,Auto">
+            <TextBox Name="ManualPath" Margin="0,0,8,0" Watermark="Folder (system/framework) or services.jar" />
+            <Button Name="ManualFolderBtn" Grid.Column="1" Content="Folder..." Margin="0,0,8,0" />
+            <Button Name="ManualFileBtn" Grid.Column="2" Content="File..." />
+          </Grid>
+          <Grid ColumnDefinitions="Auto,*,Auto">
+            <TextBlock Classes="dim" Text="Android version" VerticalAlignment="Center" Margin="0,0,12,0" />
+            <ComboBox Name="ManualApi" Grid.Column="1" HorizontalAlignment="Stretch" Margin="0,0,8,0" />
+            <Button Name="ManualGoBtn" Grid.Column="2" Content="Patch and build module" Classes="accent" />
+          </Grid>
+          <Button Name="ManualOpenBtn" Content="Show output folder" IsVisible="False" HorizontalAlignment="Left" />
+        </StackPanel>
+      </Border>
+
       <!-- about -->
       <Border Classes="card">
         <StackPanel Spacing="14">

@@ -5,7 +5,7 @@ namespace SmaliPatcherReborn;
 /// <summary>Command line mode (same code as the GUI): devices | status | install | uninstall | reboot | export.</summary>
 public static class Cli
 {
-    public static readonly string[] Commands = { "devices", "status", "install", "uninstall", "reboot", "export", "connect", "help", "--help", "-h" };
+    public static readonly string[] Commands = { "devices", "status", "install", "uninstall", "reboot", "export", "connect", "manual", "help", "--help", "-h" };
 
     public static int Run(string[] a)
     {
@@ -24,6 +24,17 @@ public static class Cli
             DeviceSession.ExportModule(path);
             Console.WriteLine($"Module written to {System.IO.Path.GetFullPath(path)}");
             return 0;
+        }
+
+        if (cmd == "manual")
+        {
+            if (!opts.TryGetValue("--in", out var inPath)) { Console.Error.WriteLine("usage: manual --in <system/framework folder or services.jar> [--api N] [--patches a,b] [--java path]"); return 2; }
+            var ids0 = opts.TryGetValue("--patches", out var pl0) ? pl0.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                                                                  : PatchInfo.All.Where(p => p.DefaultOn).Select(p => p.Id).ToArray();
+            int.TryParse(opts.GetValueOrDefault("--api", "0"), out var api0);
+            var res = ManualPatch.Run(inPath, api0, ids0, Console.WriteLine, opts.GetValueOrDefault("--java"));
+            Console.WriteLine(res.Message);
+            return res.Ok ? 0 : 1;
         }
 
         var adb = new Adb();
@@ -97,6 +108,8 @@ public static class Cli
           SmaliPatcherReborn uninstall [--serial ID] [--reboot]
           SmaliPatcherReborn reboot  [--serial ID]
           SmaliPatcherReborn export [file.zip]     save the Magisk/KernelSU/APatch module zip
+          SmaliPatcherReborn manual --in <system/framework or services.jar> [--api N] [--patches ...]
+                                                   patch a jar copied off a phone; module is written next to it (needs Java 17+)
         Common: --adb <path to adb>
 
         By saadnahid7 - https://droidrooter.com - https://github.com/saadnahid7/SmaliPatcherReborn
