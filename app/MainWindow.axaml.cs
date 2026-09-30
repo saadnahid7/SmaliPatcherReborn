@@ -16,6 +16,7 @@ public partial class MainWindow : Window
     DeviceSession? _session;
     bool _busy;
     bool _updatingBox;
+    bool _autoDone;
 
     public MainWindow()
     {
@@ -84,7 +85,7 @@ public partial class MainWindow : Window
         C<ProgressBar>("Busy").IsVisible = true;
         UpdateButtons();
         try { await job(); }
-        catch (Exception ex) { Log("Error: " + ex.Message); }
+        catch (Exception ex) { Log("Error: " + (Environment.GetEnvironmentVariable("SPR_DEBUG") == "1" ? ex.ToString() : $"{ex.GetType().Name}: {ex.Message}")); }
         finally { _busy = false; C<ProgressBar>("Busy").IsVisible = false; UpdateButtons(); }
     }
 
@@ -104,6 +105,7 @@ public partial class MainWindow : Window
 
     async Task<bool> Confirm(string title, string message, string yes = "Continue")
     {
+        if (Environment.GetEnvironmentVariable("SPR_AUTOCONFIRM") == "1" && _status?.Serial.StartsWith("emulator-") == true) return yes != "Reboot";   // test hook, emulators only
         var tcs = new TaskCompletionSource<bool>();
         var win = new Window
         {
@@ -152,6 +154,14 @@ public partial class MainWindow : Window
         // Never pick a device for the user when several are connected: reading status runs su on it.
         var readyList = _devices.Where(d => d.Ready).ToList();
         var pick = _devices.FirstOrDefault(d => d.Serial == prev) ?? (readyList.Count == 1 ? readyList[0] : null);
+        var forced = Environment.GetEnvironmentVariable("SPR_AUTOSELECT");   // test hook: pick one device by serial
+        if (!string.IsNullOrEmpty(forced) && Environment.GetEnvironmentVariable("SPR_CLICK") == "1")
+        {
+            var target = _devices.FirstOrDefault(d => d.Serial == forced);
+            DispatcherTimer.RunOnce(() => C<ComboBox>("DeviceBox").SelectedItem = target, TimeSpan.FromSeconds(2));   // same path as a user click
+            pick = null;
+        }
+        else if (!string.IsNullOrEmpty(forced)) pick = _devices.FirstOrDefault(d => d.Serial == forced);
         box.SelectedItem = pick;
         _updatingBox = false;
         Log(_devices.Count == 0 ? "No devices found. Enable USB debugging, or use Wireless debugging and Connect."
@@ -172,6 +182,8 @@ public partial class MainWindow : Window
         var st = await Task.Run(() => session.ReadStatus());
         _session = session; _status = st;
         ShowStatus(dev, st);
+        if (Environment.GetEnvironmentVariable("SPR_AUTOINSTALL") == "1" && st.Serial.StartsWith("emulator-") && !_autoDone)
+        { _autoDone = true; DispatcherTimer.RunOnce(async () => { _busy = false; await DoInstall(); }, TimeSpan.FromSeconds(1)); }   // test hook, emulators only
         if (st.Api > 0 && st.ModuleInstalled)
         {
             foreach (var p in PatchInfo.All)
@@ -234,7 +246,8 @@ public partial class MainWindow : Window
         if (!await Confirm("Install module", msg, "Install")) return;
         await Work(async () =>
         {
-            var ok = await Task.Run(() => _session.Install(st, SelectedPatches().ToList(), Log));
+            var chosen = SelectedPatches().ToList();   // read the switches here, on the UI thread
+            var ok = await Task.Run(() => _session.Install(st, chosen, Log));
             await LoadStatusCore();
             if (ok && await Confirm("Reboot", "Reboot the phone now to apply the patches?", "Reboot")) { _session.Reboot(); Log("Rebooting..."); }
         });

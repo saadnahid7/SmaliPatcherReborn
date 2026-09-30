@@ -84,10 +84,10 @@ public sealed class DeviceSession
     public string DetectRoot()
     {
         bool IsRoot(string s) => s.Contains("uid=0");
-        if (IsRoot(_adb.Shell(Serial, "id", 8000).Output)) return RootMode = "adbd";
+        if (Environment.GetEnvironmentVariable("SPR_NOADBROOT") != "1" && IsRoot(_adb.Shell(Serial, "id", 8000).Output)) return RootMode = "adbd";
         // debug builds / emulators: adb root
         var dbg = _adb.Shell(Serial, "getprop ro.debuggable", 8000).Output.Trim();
-        if (dbg == "1" && Serial.StartsWith("emulator-"))  // never restart adbd on a real phone
+        if (dbg == "1" && Serial.StartsWith("emulator-") && Environment.GetEnvironmentVariable("SPR_NOADBROOT") != "1")  // never restart adbd on a real phone
         {
             _adb.Run(Serial, 15000, "root");
             Thread.Sleep(2500);
