@@ -1,6 +1,6 @@
 # Smali Patcher Reborn
 
-Patch your phone's own Android framework **on the phone**, as a Magisk / KernelSU / APatch module, for **Android 10 – 17**.
+Patch your phone's own Android framework **on the phone**, as a Magisk / KernelSU / APatch module, for **Android 10 â€“ 17**.
 
 A desktop app (Windows, Linux, macOS) installs and manages it. The module can also be flashed on its own with no PC.
 
@@ -24,7 +24,7 @@ Smali Patcher Reborn edits `services.jar` (the system server) on your device at 
 
 ### Tested on real phones
 
-Tested by the maintainer (saadnahid7), installing the module from the root manager app and from the **Windows desktop app**. The Linux app was also run against the OnePlus over wireless adb.
+Tested by the maintainer (saadnahid7), installing the module from the root manager app and from the **Windows desktop app**. The **Linux app** (Ubuntu 24.04) was tested against the OnePlus over wireless adb (status), and against an Android 16 emulator for the full cycle: install, reboot, active, uninstall, plus manual jar patching.
 
 | Phone | ROM | Android | Root |
 |---|---|---|---|
@@ -37,15 +37,15 @@ Every patch step is matched by class and method **descriptors** (not text), and 
 
 | Android | API | Install and boot | Mock hidden | Secure window captured |
 |---|---|---|---|---|
-| 17 | 37 | ✅ | ✅ | ✅ |
-| 16 | 36 | ✅ | ✅ | ✅ |
-| 15 | 35 | ✅ | ✅ | ✅ |
-| 14 | 34 | ✅ | ✅ | ✅ |
-| 13 | 33 | ✅ | ✅ | ✅ |
-| 12 | 31 | ✅ | ✅ | ✅ |
-| 11 | 30 | ✅ | not testable (no shell test-provider command) | ✅ |
-| 10 | 29 | patches a real `services.jar` on the PC; not device-tested | – | – |
-| 9 and older | ≤ 28 | ❌ not supported | | |
+| 17 | 37 | âœ… | âœ… | âœ… |
+| 16 | 36 | âœ… | âœ… | âœ… |
+| 15 | 35 | âœ… | âœ… | âœ… |
+| 14 | 34 | âœ… | âœ… | âœ… |
+| 13 | 33 | âœ… | âœ… | âœ… |
+| 12 | 31 | âœ… | âœ… | âœ… |
+| 11 | 30 | âœ… | not testable (no shell test-provider command) | âœ… |
+| 10 | 29 | patches a real `services.jar` on the PC; not device-tested | â€“ | â€“ |
+| 9 and older | â‰¤ 28 | âŒ not supported | | |
 
 ROMs that ship a *stripped* `services.jar` (code only in odex/vdex) are not supported yet; the installer detects this and changes nothing.
 
@@ -72,7 +72,7 @@ The module stores the SHA-256 of the original jar and **refuses to install on a 
 
 ### Phone only
 
-Flash `SmaliPatcherReborn-module-*.zip` in Magisk, KernelSU or APatch. Volume keys pick patches (Vol+ yes, Vol− no, 10 s timeout keeps the default). To skip the menu, create `/data/adb/smalipatcher/patches.conf`:
+Flash `SmaliPatcherReborn-module-*.zip` in Magisk, KernelSU or APatch. Volume keys pick patches (Vol+ yes, Volâˆ’ no, 10 s timeout keeps the default). To skip the menu, create `/data/adb/smalipatcher/patches.conf`:
 
 ```
 mock-hide=1
@@ -104,12 +104,12 @@ SmaliPatcherReborn export module.zip
 
 ```
  desktop app / module zip
-        │  (adb push + root manager installs the module)
-        ▼
- customize.sh ──► app_process ──► engine.jar (dexlib2, runs on the phone's own ART)
-        │                              reads /system/framework/services.jar
-        │                              edits methods by descriptor, verifies the result
-        ▼
+        â”‚  (adb push + root manager installs the module)
+        â–¼
+ customize.sh â”€â”€â–º app_process â”€â”€â–º engine.jar (dexlib2, runs on the phone's own ART)
+        â”‚                              reads /system/framework/services.jar
+        â”‚                              edits methods by descriptor, verifies the result
+        â–¼
  module overlay:  system/framework/services.jar   (patched copy)
                   + empty placeholders for the stale odex/vdex/prof
  post-fs-data.sh: boot-loop guard, ROM-update guard, clears stale compiled code
@@ -146,12 +146,12 @@ Layout: `update.json` module update feed, `reborn/src` engine, `reborn/module` M
 
 ## Credits and thanks
 
-- **[fOmey](https://xdaforums.com/t/module-smali-patcher-7-4.3680053/)** – created the original **Smali Patcher** and the idea of patching the framework from the device itself.
-- **[sabpprook](https://xdaforums.com/t/module-smalipatcherex-1-2-2.4627905/)** – carried it forward as **SmaliPatcherEx**, adding mock-location support for Android 11 – 14.
+- **[fOmey](https://xdaforums.com/t/module-smali-patcher-7-4.3680053/)** â€“ created the original **Smali Patcher** and the idea of patching the framework from the device itself.
+- **[sabpprook](https://xdaforums.com/t/module-smalipatcherex-1-2-2.4627905/)** â€“ carried it forward as **SmaliPatcherEx**, adding mock-location support for Android 11 â€“ 14.
 - Built on [smali/dexlib2](https://github.com/google/smali) and [Avalonia](https://avaloniaui.net/).
 - Icon and colour theme follow SmaliPatcherEx (the XDA Developers logo is XDA's).
 
-Smali Patcher Reborn is a new implementation, maintained by **[saadnahid7](https://github.com/saadnahid7)** · [droidrooter.com](https://droidrooter.com).
+Smali Patcher Reborn is a new implementation, maintained by **[saadnahid7](https://github.com/saadnahid7)** Â· [droidrooter.com](https://droidrooter.com).
 
 ## License
 
