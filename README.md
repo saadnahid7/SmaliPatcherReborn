@@ -4,7 +4,7 @@ Patch your phone's own Android framework **on the phone**, as a Magisk / KernelS
 
 A desktop app (Windows, Linux, macOS) installs and manages it. The module can also be flashed on its own with no PC.
 
-> **Status: 0.3.0-dev, early release.** Tested on Android emulators (below). Not yet tested on a physical phone. Read [Safety](#safety) first.
+> **Status: 0.3.0-dev, early release.** Tested on Android emulators and on two physical phones (below). Read [Safety](#safety) first.
 
 ![Smali Patcher Reborn desktop app](docs/img/app-main.png)
 
@@ -21,6 +21,17 @@ Smali Patcher Reborn edits `services.jar` (the system server) on your device at 
 | **Allow screenshots in secure windows** | `FLAG_SECURE` no longer blocks screenshots or screen recording. |
 
 ## Supported versions
+
+### Tested on real phones
+
+Tested by the maintainer (saadnahid7), installing the module both from the **Magisk app** and from the **Windows desktop app**:
+
+| Phone | ROM | Android |
+|---|---|---|
+| Xiaomi Poco X3 Pro | crDroid | 15 |
+| OnePlus 12R | OxygenOS | 16 |
+
+### Emulators (Google APIs images, Magisk 30.7)
 
 Every patch step is matched by class and method **descriptors** (not text), and the build fails loudly if a required patch matches nothing on your ROM.
 
