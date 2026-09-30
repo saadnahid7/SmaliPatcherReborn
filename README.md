@@ -60,6 +60,16 @@ ROMs that ship a *stripped* `services.jar` (code only in odex/vdex) are not supp
 The app is a single file. It uses the `adb` already on your PC, otherwise a built-in copy.
 With several devices connected, nothing is read until you choose one.
 
+#### Running the app
+
+| System | What to do |
+|---|---|
+| **Windows** | Double-click `SmaliPatcherReborn-windows-x64.exe`. The file is not code-signed, so Windows SmartScreen may warn: choose **More info**, then **Run anyway**. |
+| **Linux** | Files downloaded from a browser are not executable. Open a terminal in the download folder and run `chmod +x SmaliPatcherReborn-linux-x64`, then `./SmaliPatcherReborn-linux-x64`. On a minimal install you may also need `sudo apt install libice6 libsm6 libfontconfig1 libx11-6`. |
+| **macOS** *(untested)* | Unzip the zip that matches your Mac (`arm64` for Apple silicon, `x64` for Intel). In Terminal, inside the unzipped folder: `chmod +x SmaliPatcherReborn`, `xattr -dr com.apple.quarantine .`, then `./SmaliPatcherReborn`. I have no Mac to test on, so please report what happens. |
+
+Every system also has a command-line mode: run the file with `help`.
+
 ### Manual jar patch (no phone connected)
 
 Copy `system/framework` (or just `services.jar`) off a phone, then use **Manual jar patch** in the app: pick the folder or file, choose the Android version (auto-detected when a `build.prop` is next to it) and press **Patch and build module**. A ready-to-flash module is written **into the same folder**.
