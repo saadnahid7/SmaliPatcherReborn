@@ -33,6 +33,7 @@ public sealed class DeviceStatus
     public bool ModuleInstalled;
     public bool ModuleDisabled;
     public bool ModuleRemoving;
+    public bool ModulePending;                 // installed, waiting for a reboot to become active
     public string ModuleVersion = "";
     public string ModuleApplied = "";
     public string ModuleFingerprint = "";
@@ -141,11 +142,13 @@ if [ -z ""$v"" ]; then
     if v=$($b -V 2>/dev/null || $b --version 2>/dev/null) && [ -n ""$v"" ]; then echo mgr=apatch; echo mgrbin=$b; echo mgrver=$v; break; fi
   done
 fi
+if [ -d /data/adb/modules_update/smalipatcher_reborn ]; then echo pending=1; echo installed=1; fi
 if [ -d $M ]; then
   echo installed=1
   echo modver=$(sed -n 's/^version=//p' $M/module.prop)
   [ -f $M/disable ] && echo disabled=1
   [ -f $M/remove ] && echo removing=1
+  [ -f $M/update ] && echo pending=1
   echo applied=$(cat $M/patches.applied 2>/dev/null)
   echo modfp=$(cat $M/fingerprint 2>/dev/null)
 fi
@@ -160,6 +163,7 @@ echo conf=$(sed -n 's/=1$//p' $C/patches.conf 2>/dev/null | tr '\n' ',')
         s.ModuleInstalled = k.ContainsKey("installed");
         s.ModuleDisabled = k.ContainsKey("disabled");
         s.ModuleRemoving = k.ContainsKey("removing");
+        s.ModulePending = k.ContainsKey("pending");
         s.ModuleVersion = k.GetValueOrDefault("modver", "");
         s.ModuleApplied = k.GetValueOrDefault("applied", "");
         s.ModuleFingerprint = k.GetValueOrDefault("modfp", "");

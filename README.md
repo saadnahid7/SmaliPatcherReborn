@@ -24,12 +24,12 @@ Smali Patcher Reborn edits `services.jar` (the system server) on your device at 
 
 ### Tested on real phones
 
-Tested by the maintainer (saadnahid7), installing the module both from the **Magisk app** and from the **Windows desktop app**:
+Tested by the maintainer (saadnahid7), installing the module from the root manager app and from the **Windows desktop app**. The Linux app was also run against the OnePlus over wireless adb.
 
-| Phone | ROM | Android |
-|---|---|---|
-| Xiaomi Poco X3 Pro | crDroid | 15 |
-| OnePlus 12R | OxygenOS | 16 |
+| Phone | ROM | Android | Root |
+|---|---|---|---|
+| Xiaomi Poco X3 Pro | crDroid | 15 | Magisk 31 |
+| OnePlus 12R | OxygenOS | 16 | KernelSU 3.3 |
 
 ### Emulators (Google APIs images, Magisk 30.7)
 

@@ -75,7 +75,7 @@ public static class Cli
                 Console.WriteLine($"build:   {st.Fingerprint}");
                 Console.WriteLine($"root:    {st.RootMode}   manager: {(st.Manager == "" ? "none" : $"{st.Manager} {st.ManagerVersion}")}");
                 Console.WriteLine($"jar:     {st.JarSize:N0} bytes{(st.JarStripped ? "  (STRIPPED)" : "")}");
-                Console.WriteLine($"module:  {(st.ModuleInstalled ? $"{st.ModuleVersion}, applied [{st.ModuleApplied}]{(st.ModuleDisabled ? ", DISABLED" : "")}{(st.ModuleRemoving ? ", pending removal" : "")}{(st.FingerprintMatches ? "" : ", needs re-patch")}" : "not installed")}");
+                Console.WriteLine($"module:  {(st.ModuleInstalled ? $"{st.ModuleVersion}, applied [{st.ModuleApplied}]{(st.ModuleDisabled ? ", DISABLED" : "")}{(st.ModuleRemoving ? ", pending removal" : "")}{(st.ModulePending ? ", installed - reboot to apply" : st.FingerprintMatches ? "" : ", needs re-patch")}" : "not installed")}");
                 if (st.GuardLog != "") Console.WriteLine($"guard:   {st.GuardLog}");
                 return 0;
             case "install":

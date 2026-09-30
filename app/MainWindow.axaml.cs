@@ -229,9 +229,10 @@ public partial class MainWindow : Window
                                    : $"services.jar {s.JarSize / 1024 / 1024.0:0.0} MB, patchable");
         Set("LModule", !s.RootOk ? "unknown"
             : !s.ModuleInstalled ? "not installed"
+            : s.ModulePending ? "installed - reboot the phone to apply it"
             : $"{s.ModuleVersion}   patches: {(s.ModuleApplied == "" ? "none" : s.ModuleApplied)}"
               + (s.ModuleDisabled ? "   DISABLED" : "") + (s.ModuleRemoving ? "   removal pending" : "")
-              + (!s.FingerprintMatches ? "   NEEDS RE-PATCH (ROM changed)" : "")
+              + (!s.ModulePending && !s.FingerprintMatches ? "   NEEDS RE-PATCH (ROM changed)" : "")
               + (s.GuardLog != "" ? $"\nSafety: {s.GuardLog}" : ""));
         Set("LBuild", s.Fingerprint);
         UpdateButtons();
