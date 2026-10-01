@@ -65,8 +65,8 @@ With several devices connected, nothing is read until you choose one.
 | System | What to do |
 |---|---|
 | **Windows** | Double-click `SmaliPatcherReborn-windows-x64.exe`. The file is not code-signed, so Windows SmartScreen may warn: choose **More info**, then **Run anyway**. |
-| **Linux** | Files downloaded from a browser are not executable. Open a terminal in the download folder and run `chmod +x SmaliPatcherReborn-linux-x64`, then `./SmaliPatcherReborn-linux-x64`. On a minimal install you may also need `sudo apt install libice6 libsm6 libfontconfig1 libx11-6`. |
-| **macOS** *(untested)* | Unzip the zip that matches your Mac (`arm64` for Apple silicon, `x64` for Intel). In Terminal, inside the unzipped folder: `chmod +x SmaliPatcherReborn`, `xattr -dr com.apple.quarantine .`, then `./SmaliPatcherReborn`. I have no Mac to test on, so please report what happens. |
+| **Linux** | Download `SmaliPatcherReborn-linux-x64.tar.gz`, then in a terminal: `tar xzf SmaliPatcherReborn-linux-x64.tar.gz` and `./SmaliPatcherReborn-linux-x64/SmaliPatcherReborn`. The archive keeps the executable permission, so no `chmod` is needed. (If you downloaded the plain `SmaliPatcherReborn-linux-x64` file instead, run `chmod +x` on it first.) On a minimal install you may also need `sudo apt install libice6 libsm6 libfontconfig1 libx11-6`. |
+| **macOS** *(untested)* | Download the `.tar.gz` that matches your Mac (`arm64` for Apple silicon, `x64` for Intel) and extract it (double-click, or `tar xzf <file>`). In Terminal, inside the extracted folder: `xattr -dr com.apple.quarantine .` then `./SmaliPatcherReborn`. I have no Mac to test on, so please report what happens. |
 
 Every system also has a command-line mode: run the file with `help`.
 
