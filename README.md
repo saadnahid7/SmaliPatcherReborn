@@ -6,7 +6,7 @@ A desktop app (Windows, Linux, macOS) installs and manages it. The module can al
 
 > **Status: 0.3.2-dev, early release.** Tested on Android emulators and on two physical phones (below). Read [Safety](#safety) first.
 
-![Smali Patcher Reborn desktop app](docs/img/app-main.png)
+![Smali Patcher Reborn desktop app](docs/img/app-screenshots.png)
 
 *The desktop app: pick a device, switch patches on or off, install the module in one click. Right: manual jar patching and the About section.*
 
