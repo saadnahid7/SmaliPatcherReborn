@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.3.2-dev
+- New app icon (a phoenix between code braces) for the window and the exe. App only; the module is unchanged (still v0.3.1-dev).
+- Linux and macOS downloads are now `.tar.gz` archives that keep the executable permission, so no `chmod` is needed.
+
 ## v0.3.1-dev
 - Install screen: the volume-key questions now start with a 3-second overview of what you will be asked, show what each key press chose, and end with a summary. The stray "Terminated" lines are gone, and a key press now registers at once.
 
