@@ -66,17 +66,22 @@ public final class Catalog {
                         new Patch.Step("dpmDisabled", L("Lcom/android/server/devicepolicy/DevicePolicyManagerService;"),
                                 Actions.returnConst("getScreenCaptureDisabled", null, 0), false))));
 
+        // AOSP flipped this method's meaning between releases: on 29-33 (AudioService) true means
+        // "safe, no warning"; on 34+ (refactored into SoundDoseHelper) true means "unsafe, clamp and warn".
+        // Each class needs its own constant, or one of the two releases gets the opposite of what it asked for.
         m.put("high-volume", new Patch("high-volume",
                 "No safe-volume warning when raising headphone volume", 28, 99,
-                L("checkSafeMediaVolume"),
+                L("checkSafeMediaVolume-legacy", "checkSafeMediaVolume-new"),
                 L(
-                        new Patch.Step("checkSafeMediaVolume", L(
-                                "Lcom/android/server/audio/AudioService;",
-                                "Lcom/android/server/audio/SoundDoseHelper;"),
+                        new Patch.Step("checkSafeMediaVolume-legacy", L(
+                                "Lcom/android/server/audio/AudioService;"),
                                 Actions.returnConst("checkSafeMediaVolume", "III", 1), false),
-                        new Patch.Step("checkSafeMediaVolume_l", L(
+                        new Patch.Step("checkSafeMediaVolume-new", L(
                                 "Lcom/android/server/audio/SoundDoseHelper;"),
-                                Actions.returnConst("checkSafeMediaVolume_l", "III", 1), false))));
+                                Actions.returnConst("checkSafeMediaVolume", "III", 0), false),
+                        new Patch.Step("checkSafeMediaVolume_l-new", L(
+                                "Lcom/android/server/audio/SoundDoseHelper;"),
+                                Actions.returnConst("checkSafeMediaVolume_l", "III", 0), false))));
 
         m.put("recovery-reboot", new Patch("recovery-reboot",
                 "The power menu's Restart goes to recovery", 28, 99,
