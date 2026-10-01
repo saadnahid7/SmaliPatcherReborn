@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <title>Smali Patcher Reborn</title>
+  <rect width="512" height="512" rx="112" fill="#00796B"/>
+  <path d="M204 118 C172 118 172 150 172 182 L172 222 C172 246 152 256 130 256 C152 256 172 266 172 290 L172 330 C172 362 172 394 204 394" fill="none" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M308 118 C340 118 340 150 340 182 L340 222 C340 246 360 256 382 256 C360 256 340 266 340 290 L340 330 C340 362 340 394 308 394" fill="none" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M256 130 C292 186 318 214 306 272 C300 306 280 330 256 344 C232 330 212 306 206 272 C196 232 226 208 238 172 C244 196 254 200 256 130 Z" fill="#FFAB00"/>
+  <path d="M256 214 C274 244 284 262 278 290 C274 306 266 318 256 326 C246 318 238 306 234 290 C230 266 244 252 256 214 Z" fill="#FFE082"/>
+</svg>
