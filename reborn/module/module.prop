@@ -1,7 +1,7 @@
 id=smalipatcher_reborn
 name=Smali Patcher Reborn
-version=v0.3.0-dev
-versionCode=300
+version=v0.3.1-dev
+versionCode=301
 author=saadnahid7
 description=Patches your own services.jar on the device at install time: hide mock location, mock without mock-app permission, allow screenshots in secure windows. Android 10 - 17.
 updateJson=https://raw.githubusercontent.com/saadnahid7/SmaliPatcherReborn/main/update.json
