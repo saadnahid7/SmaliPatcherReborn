@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.4.0-dev
+- Four more patches, all off by default: **High volume warning off**, **Signature verification off**, **Recovery reboot** (power-menu Restart goes to recovery) and **GNSS updates off**. They match on Android 10 to 17.
+- Install screen: a new question "Show the 4 extra options?" opens them. The WebUI and desktop app list them as switches.
+
 ## v0.3.2-dev
 - New app icon (a phoenix between code braces) for the window and the exe. App only; the module is unchanged (still v0.3.1-dev).
 - Linux and macOS downloads are now `.tar.gz` archives that keep the executable permission, so no `chmod` is needed.

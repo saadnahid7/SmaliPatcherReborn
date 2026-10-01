@@ -4,10 +4,14 @@
 
 CFG=/data/adb/smalipatcher
 LIVE=/data/adb/modules/smalipatcher_reborn
-ALL_PATCHES="mock-hide mock-permission secure-flag"
+ALL_PATCHES="mock-hide mock-permission secure-flag high-volume sig-verify recovery-reboot gnss-off"
 DEFAULT_CONF="mock-hide=1
 mock-permission=1
-secure-flag=0"
+secure-flag=0
+high-volume=0
+sig-verify=0
+recovery-reboot=0
+gnss-off=0"
 
 say() { if command -v ui_print >/dev/null 2>&1; then ui_print "$1"; else echo "$1"; fi; }
 

@@ -7,6 +7,10 @@ import com.android.tools.smali.dexlib2.iface.instruction.Instruction;
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction;
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction;
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference;
+import com.android.tools.smali.dexlib2.iface.reference.StringReference;
+import com.android.tools.smali.dexlib2.immutable.instruction.ImmutableInstruction21c;
+import com.android.tools.smali.dexlib2.immutable.instruction.ImmutableInstruction31c;
+import com.android.tools.smali.dexlib2.immutable.reference.ImmutableStringReference;
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethodImplementation;
 import com.android.tools.smali.dexlib2.immutable.instruction.ImmutableInstruction;
 import com.android.tools.smali.dexlib2.immutable.instruction.ImmutableInstruction10x;
@@ -148,6 +152,41 @@ public final class Actions {
             @Override public String describe() {
                 return "replace call to " + targetDescriptor + " with constant " + value
                         + (inMethods == null ? "" : " in " + inMethods);
+            }
+        };
+    }
+
+    /** Replace the string constant `from` with `to` in every method that loads it. */
+    public static Action replaceString(String from, String to) {
+        return new Action() {
+            @Override public boolean matches(Method m) {
+                return m.getImplementation() != null;
+            }
+
+            @Override public MethodImplementation apply(Method m, MethodImplementation impl) {
+                ImmutableMethodImplementation b = ImmutableMethodImplementation.of(impl);
+                List<ImmutableInstruction> out = new ArrayList<>();
+                boolean changed = false;
+                for (Instruction i : b.getInstructions()) {
+                    Opcode op = i.getOpcode();
+                    if ((op == Opcode.CONST_STRING || op == Opcode.CONST_STRING_JUMBO)
+                            && ((ReferenceInstruction) i).getReference() instanceof StringReference
+                            && ((StringReference) ((ReferenceInstruction) i).getReference()).getString().equals(from)) {
+                        int reg = ((OneRegisterInstruction) i).getRegisterA();
+                        ImmutableStringReference ref = new ImmutableStringReference(to);
+                        out.add(op == Opcode.CONST_STRING ? new ImmutableInstruction21c(op, reg, ref)
+                                : new ImmutableInstruction31c(op, reg, ref));
+                        changed = true;
+                    } else {
+                        out.add(ImmutableInstruction.of(i));
+                    }
+                }
+                if (!changed) return null;
+                return new ImmutableMethodImplementation(b.getRegisterCount(), out, b.getTryBlocks(), b.getDebugItems());
+            }
+
+            @Override public String describe() {
+                return "replace string \"" + from + "\" with \"" + to + "\"";
             }
         };
     }

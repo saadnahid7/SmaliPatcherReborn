@@ -65,6 +65,51 @@ public final class Catalog {
                                 Actions.returnConst("isScreenCaptureAllowed", null, 1), false),
                         new Patch.Step("dpmDisabled", L("Lcom/android/server/devicepolicy/DevicePolicyManagerService;"),
                                 Actions.returnConst("getScreenCaptureDisabled", null, 0), false))));
+
+        m.put("high-volume", new Patch("high-volume",
+                "No safe-volume warning when raising headphone volume", 28, 99,
+                L("checkSafeMediaVolume"),
+                L(
+                        new Patch.Step("checkSafeMediaVolume", L(
+                                "Lcom/android/server/audio/AudioService;",
+                                "Lcom/android/server/audio/SoundDoseHelper;"),
+                                Actions.returnConst("checkSafeMediaVolume", "III", 1), false),
+                        new Patch.Step("checkSafeMediaVolume_l", L(
+                                "Lcom/android/server/audio/SoundDoseHelper;"),
+                                Actions.returnConst("checkSafeMediaVolume_l", "III", 1), false))));
+
+        m.put("sig-verify", new Patch("sig-verify",
+                "Package signature checks always report a match (apps can be replaced by differently signed ones)", 28, 99,
+                L("compareSignatures", "checkSignatures"),
+                L(
+                        new Patch.Step("compareSignatures", L(
+                                "Lcom/android/server/pm/PackageManagerServiceUtils;"),
+                                Actions.returnConst("compareSignatures", null, 0), false),
+                        new Patch.Step("checkSignatures", L(
+                                "Lcom/android/server/pm/PackageManagerService;",
+                                "Lcom/android/server/pm/ComputerEngine;",
+                                "Lcom/android/server/pm/PackageManagerService$ComputerEngine;"),
+                                Actions.returnConst("checkSignatures", null, 0), false))));
+
+        m.put("recovery-reboot", new Patch("recovery-reboot",
+                "The power menu's Restart goes to recovery", 28, 99,
+                L("userrequested"),
+                L(
+                        new Patch.Step("userrequested", L(
+                                "Lcom/android/server/statusbar/StatusBarManagerService;"),
+                                Actions.replaceString("userrequested", "recovery"), false))));
+
+        m.put("gnss-off", new Patch("gnss-off",
+                "Real GPS/GNSS location updates are ignored", 28, 99,
+                L("reportLocation", "onReportLocation"),
+                L(
+                        new Patch.Step("reportLocation", L(
+                                "Lcom/android/server/location/GnssLocationProvider;",
+                                "Lcom/android/server/location/gnss/GnssLocationProvider;"),
+                                Actions.returnConst("reportLocation", "ZLandroid/location/Location;", 0), false),
+                        new Patch.Step("onReportLocation", L(
+                                "Lcom/android/server/location/gnss/GnssLocationProvider;"),
+                                Actions.returnConst("onReportLocation", "ZLandroid/location/Location;", 0), false))));
         return m;
     }
 

@@ -19,6 +19,12 @@ Smali Patcher Reborn edits `services.jar` (the system server) on your device at 
 | **Hide mock-location flag** | Locations from mock providers are not flagged (`Location.isMock()` stays `false`). |
 | **Mock apps without developer setting** | Test providers work without selecting a "mock location app". |
 | **Allow screenshots in secure windows** | `FLAG_SECURE` no longer blocks screenshots or screen recording. |
+| **High volume warning off** | No safe-volume popup when raising headphone volume. |
+| **Signature verification off** | Package signature checks always match, so a differently signed app can replace an installed one. Powerful and risky: off by default. |
+| **Recovery reboot** | *Restart* in the power menu reboots into recovery. |
+| **GNSS updates off** | Real GPS/GNSS fixes are ignored. Pair with a mock location app. |
+
+The last four are off by default. During install, a fifth question opens them ("Show the 4 extra options?").
 
 ## Supported versions
 
@@ -88,6 +94,10 @@ Flash `SmaliPatcherReborn-module-*.zip` in Magisk, KernelSU or APatch. Volume ke
 mock-hide=1
 mock-permission=1
 secure-flag=0
+high-volume=0
+sig-verify=0
+recovery-reboot=0
+gnss-off=0
 ```
 
 A WebUI in the module page lets you change patches later ("Save & re-patch").
@@ -151,7 +161,8 @@ Layout: `update.json` module update feed, `reborn/src` engine, `reborn/module` M
 
 - Stripped-jar support (extract code from odex/vdex), also for manual mode
 - KernelSU / APatch re-patch without the original jar mirror
-- Optional patches: reboot-to-recovery in power menu, high-volume warning, hide the mock-app developer setting, screen-recording detection callbacks
+- Signature spoofing (the old tool's most complex patch) and a Samsung Knox patch (needs a Samsung device to test)
+- Optional patches: hide the mock-app developer setting, screen-recording detection callbacks
 - Physical-device and KernelSU/APatch verification
 
 ## Credits and thanks

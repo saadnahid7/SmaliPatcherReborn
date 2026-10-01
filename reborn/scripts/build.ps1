@@ -6,6 +6,6 @@ $out  = Join-Path $root 'build\classes'
 Remove-Item $out -Recurse -Force -EA 0
 New-Item -ItemType Directory -Force $out | Out-Null
 $src = Get-ChildItem (Join-Path $root 'src') -Recurse -Filter *.java | % FullName
-& "$jdk\javac.exe" --release 17 -encoding UTF-8 -cp "$root\libs\*" -d $out $src
+& "$jdk\javac.exe" --release 17 -XDsuppressNotes -encoding UTF-8 -cp "$root\libs\*" -d $out $src
 if ($LASTEXITCODE) { throw 'javac failed' }
 "built -> $out"
