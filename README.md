@@ -1,6 +1,6 @@
 # Smali Patcher Reborn
 
-Patch your phone's own Android framework **on the phone**, as a Magisk / KernelSU / APatch module, for **Android 10 â€“ 17**.
+Patch your phone's own Android framework **on the phone**, as a Magisk / KernelSU / APatch module, for **Android 10 to 17**.
 
 A desktop app (Windows, Linux, macOS) installs and manages it. The module can also be flashed on its own with no PC.
 
