@@ -8,9 +8,7 @@ A desktop app (Windows, Linux, macOS) installs and manages it. The module can al
 
 ![Smali Patcher Reborn desktop app](docs/img/app-main.png)
 
-*The desktop app: pick a device, switch patches on or off, install the module in one click. Below it: manual jar patching and the About section.*
-
-![About and manual patch section](docs/img/app-about.png)
+*The desktop app: pick a device, switch patches on or off, install the module in one click. Right: manual jar patching and the About section.*
 
 ## What it does
 
