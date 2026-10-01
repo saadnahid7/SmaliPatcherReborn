@@ -157,10 +157,10 @@ public final class Actions {
     }
 
     /** Replace the string constant `from` with `to` in every method that loads it. */
-    public static Action replaceString(String from, String to) {
+    public static Action replaceString(java.util.function.Predicate<String> methodFilter, String from, String to) {
         return new Action() {
             @Override public boolean matches(Method m) {
-                return m.getImplementation() != null;
+                return m.getImplementation() != null && (methodFilter == null || methodFilter.test(m.getName()));
             }
 
             @Override public MethodImplementation apply(Method m, MethodImplementation impl) {
@@ -186,7 +186,8 @@ public final class Actions {
             }
 
             @Override public String describe() {
-                return "replace string \"" + from + "\" with \"" + to + "\"";
+                return "replace string \"" + from + "\" with \"" + to + "\""
+                        + (methodFilter == null ? "" : " in matching methods");
             }
         };
     }

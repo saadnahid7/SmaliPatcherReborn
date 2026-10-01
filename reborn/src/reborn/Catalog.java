@@ -87,9 +87,16 @@ public final class Catalog {
                 "The power menu's Restart goes to recovery", 28, 99,
                 L("userrequested"),
                 L(
+                        // scoped to reboot(Z) only: shutdown() carries the same "userrequested" string down
+                        // to the native low-level shutdown call, where "recovery" is meaningless/undefined -
+                        // patching it there would corrupt Power off, not just Restart. On API 29/30 the
+                        // compiler emits reboot()'s body as a synthetic lambda$reboot$N instead of inlining
+                        // it (the suffix shifts release to release, so match the name, not a specific number).
                         new Patch.Step("userrequested", L(
                                 "Lcom/android/server/statusbar/StatusBarManagerService;"),
-                                Actions.replaceString("userrequested", "recovery"), false))));
+                                Actions.replaceString(
+                                        n -> n.equals("reboot") || n.startsWith("lambda$reboot$"),
+                                        "userrequested", "recovery"), false))));
 
         m.put("gnss-off", new Patch("gnss-off",
                 "Real GPS/GNSS location updates are ignored", 28, 99,
