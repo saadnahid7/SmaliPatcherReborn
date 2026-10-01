@@ -39,9 +39,8 @@ choose_patches() {
   ui_print "   2 · Mock apps without dev setting  (default ON)"
   ui_print "   3 · Screenshots in secure windows  (default OFF)"
   ui_print ""
-  ui_print "   After these you can open 4 extra options (all default OFF):"
-  ui_print "   High volume warning · Signature verification"
-  ui_print "   Recovery reboot · GNSS (GPS) updates off"
+  ui_print "   After these you can open 3 extra options (all default OFF):"
+  ui_print "   High volume warning · Recovery reboot · GNSS (GPS) updates off"
   ui_print ""
   ui_print "   Volume UP = YES      Volume DOWN = NO"
   ui_print "   Each question waits ${SECS} seconds, then keeps its default."
@@ -53,14 +52,13 @@ choose_patches() {
   ask 2 "Mock apps without developer setting" "Test providers work without picking a mock location app." y;   A2=$ANS
   ask 3 "Screenshots in secure windows" "Ignore FLAG_SECURE for screenshots and screen recording." n;   A3=$ANS
 
-  A4=n; A5=n; A6=n; A7=n
-  ask X "Show the 4 extra options?" "Vol+ opens them, Vol- skips them (they stay OFF)." n
+  A4=n; A6=n; A7=n
+  ask X "Show the 3 extra options?" "Vol+ opens them, Vol- skips them (they stay OFF)." n
   if [ "$ANS" = y ]; then
-    TOTAL=7
+    TOTAL=6
     ask 4 "High volume warning" "No safe-volume popup when raising headphone volume." n;   A4=$ANS
-    ask 5 "Signature verification" "Signature checks always match. Lets differently signed apps replace installed ones." n;   A5=$ANS
-    ask 6 "Recovery reboot" "Restart in the power menu reboots into recovery." n;   A6=$ANS
-    ask 7 "GNSS updates off" "Real GPS fixes are ignored. Pair with a mock location app." n;   A7=$ANS
+    ask 5 "Recovery reboot" "Restart in the power menu reboots into recovery." n;   A6=$ANS
+    ask 6 "GNSS updates off" "Real GPS fixes are ignored. Pair with a mock location app." n;   A7=$ANS
   fi
 
   mkdir -p "$CFG"
@@ -69,7 +67,6 @@ choose_patches() {
     [ "$A2" = y ] && echo "mock-permission=1" || echo "mock-permission=0"
     [ "$A3" = y ] && echo "secure-flag=1" || echo "secure-flag=0"
     [ "$A4" = y ] && echo "high-volume=1" || echo "high-volume=0"
-    [ "$A5" = y ] && echo "sig-verify=1" || echo "sig-verify=0"
     [ "$A6" = y ] && echo "recovery-reboot=1" || echo "recovery-reboot=0"
     [ "$A7" = y ] && echo "gnss-off=1" || echo "gnss-off=0"
   } > "$CFG/patches.conf"
@@ -80,7 +77,6 @@ choose_patches() {
   ui_print "  │  [$(onoff $A2)]  Mock apps without developer setting"
   ui_print "  │  [$(onoff $A3)]  Screenshots in secure windows"
   ui_print "  │  [$(onoff $A4)]  High volume warning"
-  ui_print "  │  [$(onoff $A5)]  Signature verification"
   ui_print "  │  [$(onoff $A6)]  Recovery reboot"
   ui_print "  │  [$(onoff $A7)]  GNSS updates off"
   ui_print "  └──────────────────────────────────────────"

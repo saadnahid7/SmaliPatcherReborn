@@ -78,19 +78,6 @@ public final class Catalog {
                                 "Lcom/android/server/audio/SoundDoseHelper;"),
                                 Actions.returnConst("checkSafeMediaVolume_l", "III", 1), false))));
 
-        m.put("sig-verify", new Patch("sig-verify",
-                "Package signature checks always report a match (apps can be replaced by differently signed ones)", 28, 99,
-                L("compareSignatures", "checkSignatures"),
-                L(
-                        new Patch.Step("compareSignatures", L(
-                                "Lcom/android/server/pm/PackageManagerServiceUtils;"),
-                                Actions.returnConst("compareSignatures", null, 0), false),
-                        new Patch.Step("checkSignatures", L(
-                                "Lcom/android/server/pm/PackageManagerService;",
-                                "Lcom/android/server/pm/ComputerEngine;",
-                                "Lcom/android/server/pm/PackageManagerService$ComputerEngine;"),
-                                Actions.returnConst("checkSignatures", null, 0), false))));
-
         m.put("recovery-reboot", new Patch("recovery-reboot",
                 "The power menu's Restart goes to recovery", 28, 99,
                 L("userrequested"),

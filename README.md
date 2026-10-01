@@ -20,11 +20,10 @@ Smali Patcher Reborn edits `services.jar` (the system server) on your device at 
 | **Mock apps without developer setting** | Test providers work without selecting a "mock location app". |
 | **Allow screenshots in secure windows** | `FLAG_SECURE` no longer blocks screenshots or screen recording. |
 | **High volume warning off** | No safe-volume popup when raising headphone volume. |
-| **Signature verification off** | Package signature checks always match, so a differently signed app can replace an installed one. Powerful and risky: off by default. |
 | **Recovery reboot** | *Restart* in the power menu reboots into recovery. |
 | **GNSS updates off** | Real GPS/GNSS fixes are ignored. Pair with a mock location app. |
 
-The last four are off by default. During install, a fifth question opens them ("Show the 4 extra options?").
+The last three are off by default. During install, a fourth question opens them ("Show the 3 extra options?").
 
 ## Supported versions
 
@@ -95,7 +94,6 @@ mock-hide=1
 mock-permission=1
 secure-flag=0
 high-volume=0
-sig-verify=0
 recovery-reboot=0
 gnss-off=0
 ```
@@ -161,7 +159,7 @@ Layout: `update.json` module update feed, `reborn/src` engine, `reborn/module` M
 
 - Stripped-jar support (extract code from odex/vdex), also for manual mode
 - KernelSU / APatch re-patch without the original jar mirror
-- Signature spoofing (the old tool's most complex patch) and a Samsung Knox patch (needs a Samsung device to test)
+- Signature spoofing and signature verification (both need more work: an early build of signature verification crashed Bluetooth on Android 14, so it was pulled before release) and a Samsung Knox patch (needs a Samsung device to test)
 - Optional patches: hide the mock-app developer setting, screen-recording detection callbacks
 - Physical-device and KernelSU/APatch verification
 

@@ -1,8 +1,9 @@
 # Changelog
 
 ## v0.4.0-dev
-- Four more patches, all off by default: **High volume warning off**, **Signature verification off**, **Recovery reboot** (power-menu Restart goes to recovery) and **GNSS updates off**. They match on Android 10 to 17.
-- Install screen: a new question "Show the 4 extra options?" opens them. The WebUI and desktop app list them as switches.
+- Three more patches, all off by default: **High volume warning off**, **Recovery reboot** (power-menu Restart goes to recovery) and **GNSS updates off**. They match on Android 10 to 17.
+- Install screen: a new question "Show the 3 extra options?" opens them. The WebUI and desktop app list them as switches.
+- A signature-verification patch was built and tested, then pulled before release: an early build crashed Bluetooth at boot on Android 14. It needs a narrower rewrite before it ships.
 
 ## v0.3.2-dev
 - New app icon (a phoenix between code braces) for the window and the exe. App only; the module is unchanged (still v0.3.1-dev).
