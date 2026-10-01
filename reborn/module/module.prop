@@ -3,5 +3,5 @@ name=Smali Patcher Reborn
 version=v0.4.0-dev
 versionCode=400
 author=saadnahid7
-description=Patches your own services.jar on the device at install time: hide mock location, mock without mock-app permission, allow screenshots in secure windows, plus optional high-volume warning, recovery reboot and GNSS off. Android 10 - 17.
+description=Patches your own services.jar on the device at install time: hide mock location, mock without mock-app permission, allow screenshots in secure windows, plus optional high-volume warning and GNSS off. Android 10 - 17.
 updateJson=https://raw.githubusercontent.com/saadnahid7/SmaliPatcherReborn/main/update.json

@@ -1,11 +1,11 @@
 # Changelog
 
 ## v0.4.0-dev
-- Three more patches, all off by default: **High volume warning off**, **Recovery reboot** (power-menu Restart goes to recovery) and **GNSS updates off**. They match on Android 10 to 17.
-- Install screen: a new question "Show the 3 extra options?" opens them. The WebUI and desktop app list them as switches.
+- Two more patches, all off by default: **High volume warning off** and **GNSS updates off**. They match on Android 10 to 17.
+- Install screen: a new question "Show the 2 extra options?" opens them. The WebUI and desktop app list them as switches.
 - A signature-verification patch was built and tested, then pulled before release: an early build crashed Bluetooth at boot on Android 14. It needs a narrower rewrite before it ships.
+- A recovery-reboot patch (power-menu Restart goes to recovery) was also built, fixed after two real bugs, and verified clean on real hardware - then removed by request. It worked exactly as designed, but that design means *every* Restart from the power menu goes to recovery once enabled, with no way to still do a normal restart; too disruptive for a daily-driver phone. Dropped instead of adding a workaround.
 - Fix: **High volume warning off** did the opposite of its name on Android 14+ (a popup on every volume change, instead of none). AOSP flipped the meaning of the check's return value between releases; found by real-device testing on a OnePlus 12R, fixed and verified against every supported version.
-- Fix: **Recovery reboot** also silently changed what *Power off* does, not just *Restart* - both menu items share one string in the method the patch edits. Narrowed the patch to the Restart path only; verified on every supported version that Power off is untouched.
 
 ## v0.3.2-dev
 - New app icon (a phoenix between code braces) for the window and the exe. App only; the module is unchanged (still v0.3.1-dev).

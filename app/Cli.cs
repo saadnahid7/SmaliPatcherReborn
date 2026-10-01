@@ -104,7 +104,7 @@ public static class Cli
           SmaliPatcherReborn devices               list adb devices
           SmaliPatcherReborn connect <ip:port>     adb connect (wireless debugging)
           SmaliPatcherReborn status  [--serial ID]
-          SmaliPatcherReborn install [--serial ID] [--patches mock-hide,mock-permission,secure-flag,high-volume,recovery-reboot,gnss-off] [--reboot]
+          SmaliPatcherReborn install [--serial ID] [--patches mock-hide,mock-permission,secure-flag,high-volume,gnss-off] [--reboot]
           SmaliPatcherReborn uninstall [--serial ID] [--reboot]
           SmaliPatcherReborn reboot  [--serial ID]
           SmaliPatcherReborn export [file.zip]     save the Magisk/KernelSU/APatch module zip

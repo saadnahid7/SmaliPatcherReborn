@@ -16,7 +16,6 @@ public sealed class PatchInfo
         new() { Id = "mock-permission", Title = "Mock apps without developer setting", Description = "Test providers work without picking a \"mock location app\".", DefaultOn = true },
         new() { Id = "secure-flag", Title = "Allow screenshots in secure windows", Description = "Ignores FLAG_SECURE for screenshots and screen recording.", DefaultOn = false },
         new() { Id = "high-volume", Title = "High volume warning off", Description = "No safe-volume popup when raising headphone volume.", DefaultOn = false },
-        new() { Id = "recovery-reboot", Title = "Recovery reboot", Description = "Restart in the power menu reboots into recovery.", DefaultOn = false },
         new() { Id = "gnss-off", Title = "GNSS updates off", Description = "Real GPS fixes are ignored. Pair with a mock location app.", DefaultOn = false },
     };
 }

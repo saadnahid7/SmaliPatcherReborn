@@ -20,10 +20,9 @@ Smali Patcher Reborn edits `services.jar` (the system server) on your device at 
 | **Mock apps without developer setting** | Test providers work without selecting a "mock location app". |
 | **Allow screenshots in secure windows** | `FLAG_SECURE` no longer blocks screenshots or screen recording. |
 | **High volume warning off** | No safe-volume popup when raising headphone volume. |
-| **Recovery reboot** | *Restart* in the power menu reboots into recovery. |
 | **GNSS updates off** | Real GPS/GNSS fixes are ignored. Pair with a mock location app. |
 
-The last three are off by default. During install, a fourth question opens them ("Show the 3 extra options?").
+The last two are off by default. During install, a fourth question opens them ("Show the 2 extra options?").
 
 ## Supported versions
 
@@ -94,7 +93,6 @@ mock-hide=1
 mock-permission=1
 secure-flag=0
 high-volume=0
-recovery-reboot=0
 gnss-off=0
 ```
 

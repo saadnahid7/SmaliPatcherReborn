@@ -82,13 +82,12 @@ const INFO = {
   'mock-permission': ['Mock apps without developer setting','Test providers work without picking a "mock location app".'],
   'secure-flag':     ['Allow screenshots in secure windows','Ignores FLAG_SECURE for capture and screen recording.'],
   'high-volume':     ['High volume warning off','No safe-volume popup when raising headphone volume.'],
-  'recovery-reboot': ['Recovery reboot','Restart in the power menu reboots into recovery.'],
   'gnss-off':        ['GNSS updates off','Real GPS fixes are ignored. Pair with a mock location app.'],
 };
 
 // ---- shell bridge: KernelSU / APatch / WebUI-X inject window.ksu; otherwise run in preview mode ----
 const preview = typeof ksu === 'undefined';
-const fake = { conf:'mock-hide=1\nmock-permission=1\nsecure-flag=0\nhigh-volume=0\nrecovery-reboot=0\ngnss-off=0\n', applied:'mock-hide,mock-permission\n' };
+const fake = { conf:'mock-hide=1\nmock-permission=1\nsecure-flag=0\nhigh-volume=0\ngnss-off=0\n', applied:'mock-hide,mock-permission\n' };
 function sh(cmd) {
   if (preview) return Promise.resolve(previewShell(cmd));
   return new Promise(res => {
