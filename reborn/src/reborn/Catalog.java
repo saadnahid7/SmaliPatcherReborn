@@ -83,6 +83,28 @@ public final class Catalog {
                                 "Lcom/android/server/audio/SoundDoseHelper;"),
                                 Actions.returnConst("checkSafeMediaVolume_l", "III", 0), false))));
 
+        // Two gates keep arbitrary overlays out:
+        //  1. IdmapManager.enforceOverlayable (Android 11+; Android 10 does not enforce overlayables for these overlays,
+        //     so the patch would change nothing there): idmap2 only lets an overlay touch resources the
+        //     target marked overlayable. Forcing it false lifts that for every overlay.
+        //  2. InstallPackageHelper.assertOverlayIsValid (Android 13+, a method of its own): an overlay signed
+        //     differently from its target must declare targetName, and one targeting below Q must be platform
+        //     signed. Every comparePackageSignatures inside it is one of those two checks, so they are forced to
+        //     "match". On Android 10-12 the same checks sit in the big assertPackageIsValid next to an unrelated
+        //     shared-user signature check, so nothing is changed there.
+        m.put("overlay-any", new Patch("overlay-any",
+                "Overlays can override any resource of their target (Android 11+), and install without a matching signature (Android 13+)", 30, 99,
+                L("enforceOverlayable"),
+                L(
+                        new Patch.Step("enforceOverlayable", L(
+                                "Lcom/android/server/om/IdmapManager;"),
+                                Actions.returnConst("enforceOverlayable", null, 0), false),
+                        new Patch.Step("overlaySignature", L(
+                                "Lcom/android/server/pm/InstallPackageHelper;"),
+                                Actions.forceResultMatching(S("assertOverlayIsValid"),
+                                        d -> d.startsWith("Lcom/android/server/pm/PackageManagerServiceUtils;->comparePackageSignatures("),
+                                        "PackageManagerServiceUtils.comparePackageSignatures", 1), false))));
+
         m.put("gnss-off", new Patch("gnss-off",
                 "Real GPS/GNSS location updates are ignored", 28, 99,
                 L("reportLocation", "onReportLocation"),

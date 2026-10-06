@@ -38,6 +38,28 @@
   pre { margin:10px 0 0; padding:10px; border-radius:10px; background:var(--bg); border:1px solid var(--line); font:12px/1.4 ui-monospace, monospace; max-height:220px; overflow:auto; white-space:pre-wrap; word-break:break-all; }
   .note { font-size:13px; color:var(--dim); margin-top:10px; }
   .banner { padding:10px 12px; border-radius:10px; font-size:13px; margin-bottom:14px; border:1px solid var(--warn); color:var(--warn); }
+  .support { display:flex; align-items:center; gap:12px; padding:10px 14px; }
+  .support .heart, .dhead .heart { flex:none; width:38px; height:38px; border-radius:50%; background:#ffab00; display:grid; place-items:center; }
+  .support .heart svg, .dhead .heart svg { width:20px; height:20px; fill:#004d40; }
+  .support .t { flex:1; min-width:0; } .support .t b { display:block; font-weight:600; } .support .t small { color:var(--dim); }
+  .support button { padding:8px 16px; background:#00796b; color:#fff; }
+  dialog { border:0; padding:0; border-radius:18px; width:min(92vw, 420px); background:var(--card); color:var(--ink); box-shadow:0 24px 60px rgba(0,0,0,.35); overflow:hidden; }
+  dialog[open] { animation:pop .22s ease-out; }
+  dialog::backdrop { background:rgba(8,12,12,.5); backdrop-filter:blur(2px); }
+  @keyframes pop { from { opacity:0; transform:translateY(14px) scale(.97); } to { opacity:1; transform:none; } }
+  .dhead { display:flex; align-items:center; gap:12px; padding:16px 18px; color:#fff; background:linear-gradient(135deg,#00897b,#004d40); }
+  .dhead .heart { width:42px; height:42px; } .dhead b { display:block; font-size:17px; } .dhead small { opacity:.8; }
+  .dbody { padding:12px 18px 16px; }
+  .dtext { margin:0 0 6px; font-size:13px; color:var(--dim); }
+  .wallet { display:grid; grid-template-columns:38px 1fr auto; gap:10px; align-items:center; padding:9px 0; border-top:1px solid var(--line); }
+  .wallet:first-of-type { border-top:0; }
+  .coin { width:38px; height:38px; border-radius:50%; display:grid; place-items:center; color:#fff; font:700 10px/1 system-ui, sans-serif; }
+  .wallet b { display:block; font-size:13px; font-weight:600; }
+  .wallet code { display:block; margin-top:2px; font:11px/1.35 ui-monospace, monospace; color:var(--dim); word-break:break-all; user-select:all; -webkit-user-select:all; }
+  .wallet button { padding:6px 12px; font-size:13px; }
+  .dfoot { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:8px; }
+  .dfoot small { color:var(--dim); font-size:11px; }
+  .dfoot button { padding:8px 18px; background:#00796b; color:#fff; }
   [hidden] { display:none !important; }
 </style>
 </head>
@@ -74,6 +96,24 @@
   <pre id="log" hidden></pre>
 </div>
 
+<div class="card support" id="donate" hidden>
+  <span class="heart" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></span>
+  <span class="t"><b>Keep free tools free</b><small>Support Smali Patcher Reborn</small></span>
+  <button id="donateBtn">Donate</button>
+</div>
+
+<dialog id="donateDlg">
+  <div class="dhead">
+    <span class="heart" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></span>
+    <span><b>Keep free tools free</b><small>Support Smali Patcher Reborn</small></span>
+  </div>
+  <div class="dbody">
+    <p class="dtext">Your support keeps this project free, maintained for every new Android release, and inspires the next free tool. Any amount helps.</p>
+    <div id="wallets"></div>
+    <div class="dfoot"><small>Send only the coin shown, on the network shown.</small><button id="donateClose">Close</button></div>
+  </div>
+</dialog>
+
 <script>
 const MOD  = '/data/adb/modules/smalipatcher_reborn';
 const CFG  = '/data/adb/smalipatcher';
@@ -83,11 +123,12 @@ const INFO = {
   'secure-flag':     ['Allow screenshots in secure windows','Ignores FLAG_SECURE for capture and screen recording.'],
   'high-volume':     ['High volume warning off','No safe-volume popup when raising headphone volume.'],
   'gnss-off':        ['GNSS updates off','Real GPS fixes are ignored. Pair with a mock location app.'],
+  'overlay-any':     ['Overlay any','Overlay apps can override any resource (Android 11+) and install without a matching signature (Android 13+). Advanced.'],
 };
 
 // ---- shell bridge: KernelSU / APatch / WebUI-X inject window.ksu; otherwise run in preview mode ----
 const preview = typeof ksu === 'undefined';
-const fake = { conf:'mock-hide=1\nmock-permission=1\nsecure-flag=0\nhigh-volume=0\ngnss-off=0\n', applied:'mock-hide,mock-permission\n' };
+const fake = { conf:'mock-hide=1\nmock-permission=1\nsecure-flag=0\nhigh-volume=0\ngnss-off=0\noverlay-any=0\n', applied:'mock-hide,mock-permission\n' };
 function sh(cmd) {
   if (preview) return Promise.resolve(previewShell(cmd));
   return new Promise(res => {
@@ -114,6 +155,42 @@ function previewShell(cmd) {
 }
 
 const $ = id => document.getElementById(id);
+
+// ---- donate: make-module.ps1 replaces the marker with the wallets from donate/wallets.json (left empty: card hidden) ----
+const WALLETS = /*WALLETS*/[];
+const COIN_COLOR = { BTC:'#f7931a', ETH:'#627eea', USDT:'#26a17b' };
+function mk(tag, text, cls) { const e = document.createElement(tag); if (text !== undefined) e.textContent = text; if (cls) e.className = cls; return e; }
+async function copyText(text, btn) {
+  let ok = false;
+  try { await navigator.clipboard.writeText(text); ok = true; } catch (e) { /* WebUI webviews often block the async clipboard */ }
+  if (!ok) {
+    const t = document.createElement('textarea'); t.value = text; t.style.position = 'fixed'; t.style.opacity = '0';
+    document.body.appendChild(t); t.select();
+    try { ok = document.execCommand('copy'); } catch (e) { }
+    t.remove();
+  }
+  btn.textContent = ok ? 'Copied' : 'Select it';
+  setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+}
+function renderDonate() {
+  if (!WALLETS.length) return;
+  $('donate').hidden = false;
+  const box = $('wallets');
+  WALLETS.forEach(w => {
+    const d = mk('div', undefined, 'wallet');
+    const coin = mk('span', w.ticker, 'coin'); coin.style.background = COIN_COLOR[w.ticker] || '#00796b';
+    const info = mk('div'); info.append(mk('b', w.coin + ' \u00b7 ' + w.network), mk('code', w.address));
+    const b = mk('button', 'Copy', 'ghost'); b.onclick = () => copyText(w.address, b);
+    d.append(coin, info, b); box.append(d);
+  });
+  const dlg = $('donateDlg');
+  const open = () => { if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', ''); };
+  const close = () => { if (typeof dlg.close === 'function') dlg.close(); else dlg.removeAttribute('open'); };
+  $('donateBtn').onclick = open;
+  $('donateClose').onclick = close;
+  dlg.addEventListener('click', e => { if (e.target === dlg) close(); });   // a tap on the dimmed area closes it
+}
+renderDonate();
 let conf = {};
 
 function parseConf(t) { const c = {}; t.split('\n').forEach(l => { const m = l.match(/^([\w-]+)=(\d)$/); if (m) c[m[1]] = m[2] === '1'; }); return c; }

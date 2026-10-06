@@ -17,6 +17,7 @@ public sealed class PatchInfo
         new() { Id = "secure-flag", Title = "Allow screenshots in secure windows", Description = "Ignores FLAG_SECURE for screenshots and screen recording.", DefaultOn = false },
         new() { Id = "high-volume", Title = "High volume warning off", Description = "No safe-volume popup when raising headphone volume.", DefaultOn = false },
         new() { Id = "gnss-off", Title = "GNSS updates off", Description = "Real GPS fixes are ignored. Pair with a mock location app.", DefaultOn = false },
+        new() { Id = "overlay-any", Title = "Overlay any", Description = "Overlay apps can override any resource (Android 11+) and install without a matching signature (Android 13+). Advanced.", DefaultOn = false },
     };
 }
 

@@ -58,6 +58,10 @@ public final class Engine {
             active.add(p);
             for (Patch.Step s : p.steps) candidates.addAll(s.classes);
         }
+        if (active.isEmpty()) {
+            res.errors.add("none of the selected patches apply to Android API " + api + " (" + String.join("; ", res.log) + ")");
+            return res;
+        }
 
         try (ZipFile zip = new ZipFile(inJar)) {
             List<String> dexNames = new ArrayList<>();

@@ -40,7 +40,7 @@ public class Main {
     static void usage() {
         System.out.println("""
                 smalipatcher-reborn engine
-                  patch --in services.jar --out out.jar --api 36 [--patches mock-hide,mock-permission,secure-flag,high-volume,gnss-off]
+                  patch --in services.jar --out out.jar --api 36 [--patches mock-hide,mock-permission,secure-flag,high-volume,gnss-off,overlay-any]
                   find  --jar services.jar --re <regex> [--api 36]     (matches Lclass;->method)
                   baksmali <baksmali args...>""");
     }

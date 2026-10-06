@@ -29,6 +29,18 @@ public partial class MainWindow : Window
         {
             if (Environment.GetEnvironmentVariable("SPR_SHOT") == "1") { WindowState = WindowState.Normal; Width = 980; Height = 1000; Position = new PixelPoint(20, 5); Topmost = true; }
         };
+        Opened += (_, _) =>   // test hook: write a PNG of the main window (README screenshots) and nothing else
+        {
+            var png = Environment.GetEnvironmentVariable("SPR_SHOT_MAIN");
+            if (string.IsNullOrEmpty(png)) return;
+            DispatcherTimer.RunOnce(() =>
+            {
+                var size = new PixelSize((int)Bounds.Width, (int)Bounds.Height);
+                using var bmp = new Avalonia.Media.Imaging.RenderTargetBitmap(size, new Vector(96, 96));
+                bmp.Render(this);
+                bmp.Save(png);
+            }, TimeSpan.FromSeconds(4));
+        };
         Opened += (_, _) =>   // test hook: run the manual patch on a given path without clicking
         {
             var p = Environment.GetEnvironmentVariable("SPR_AUTOMANUAL");
@@ -84,6 +96,12 @@ public partial class MainWindow : Window
         C<Button>("AuthorBtn").Click += (_, _) => About.Open(About.AuthorUrl);
         C<Button>("OrigBtn").Click += (_, _) => About.Open(About.OriginalUrl);
         C<Button>("ExBtn").Click += (_, _) => About.Open(About.UpdateUrl);
+        C<Border>("DonateCard").IsVisible = Donate.Enabled;
+        if (Environment.GetEnvironmentVariable("SPR_DONATE_TEST_LOG") is { Length: > 0 } tlog)   // test hook: report whether the Donate card is shown
+            Opened += (_, _) => { try { File.AppendAllText(tlog, "card:visible=" + C<Border>("DonateCard").IsVisible + "\n"); } catch { } };
+        C<Button>("DonateBtn").Click += async (_, _) => await ShowDonate(afterPatch: false);
+        if (Environment.GetEnvironmentVariable("SPR_DONATE_OPEN") == "1")   // test hook: open the Donate window without clicking
+            Opened += (_, _) => DispatcherTimer.RunOnce(async () => await ShowDonate(afterPatch: false), TimeSpan.FromSeconds(2));
     }
 
     // ---- helpers ------------------------------------------------------------------------------------
@@ -145,6 +163,30 @@ public partial class MainWindow : Window
         };
         await win.ShowDialog(this);
         return await tcs.Task;
+    }
+
+    // ---- donate -------------------------------------------------------------------------------------
+
+    bool _donateOpen;
+
+    async Task ShowDonate(bool afterPatch)
+    {
+        if (!Donate.Enabled || _donateOpen) return;
+        _donateOpen = true;
+        try
+        {
+            var result = await new DonateDialog(afterPatch).ShowDialog<DonateResult>(this);
+            if (afterPatch && result == DonateResult.Never) Prefs.SetDonateNever();
+        }
+        catch { }   // a donation prompt must never be able to break the app (for example: the main window was closed meanwhile)
+        finally { _donateOpen = false; }
+    }
+
+    /// <summary>Called once after a patch really succeeded (never after a failure, never in CLI mode).</summary>
+    async Task AfterPatch()
+    {
+        if (!Donate.Enabled || Prefs.DonateNever) return;
+        await ShowDonate(afterPatch: true);
     }
 
     // ---- flow ---------------------------------------------------------------------------------------
@@ -264,13 +306,16 @@ public partial class MainWindow : Window
                   "It patches your phone's framework at install time and takes effect after a reboot. " +
                   "If the phone fails to boot three times, the module disables itself. Make a backup first.";
         if (!await Confirm("Install module", msg, "Install")) return;
+        var installed = false;
         await Work(async () =>
         {
             var chosen = SelectedPatches().ToList();   // read the switches here, on the UI thread
             var ok = await Task.Run(() => _session.Install(st, chosen, Log));
+            installed = ok;
             await LoadStatusCore();
             if (ok && await Confirm("Reboot", "Reboot the phone now to apply the patches?", "Reboot")) { _session.Reboot(); Log("Rebooting..."); }
         });
+        if (installed) await AfterPatch();   // after the reboot question, outside Work so the progress bar is idle
     }
 
     async Task DoUninstall()
@@ -347,12 +392,15 @@ public partial class MainWindow : Window
         // read every control here, on the UI thread, before the background work starts
         var api = ManualPatch.AndroidVersions[Math.Max(0, C<ComboBox>("ManualApi").SelectedIndex)].Api;
         var chosen = SelectedPatches().ToList();
+        var built = false;
         await Work(async () =>
         {
             var res = await Task.Run(() => ManualPatch.Run(path, api, chosen, Log));
             Log(res.Message);
             _manualOut = res.ZipPath;
             C<Button>("ManualOpenBtn").IsVisible = res.Ok;
+            built = res.Ok;
         });
+        if (built) await AfterPatch();
     }
 }

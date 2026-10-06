@@ -21,8 +21,9 @@ Smali Patcher Reborn edits `services.jar` (the system server) on your device at 
 | **Allow screenshots in secure windows** | `FLAG_SECURE` no longer blocks screenshots or screen recording. |
 | **High volume warning off** | No safe-volume popup when raising headphone volume. |
 | **GNSS updates off** | Real GPS/GNSS fixes are ignored. Pair with a mock location app. |
+| **Overlay any** | Overlay apps can override any resource of their target (Android 11+), and a differently signed overlay app can be installed (Android 13+). Advanced. |
 
-The last two are off by default. During install, a fourth question opens them ("Show the 2 extra options?").
+The last three are off by default. During install, a fourth question opens them ("Show the 3 extra options?").
 
 ## Supported versions
 
@@ -94,6 +95,7 @@ mock-permission=1
 secure-flag=0
 high-volume=0
 gnss-off=0
+overlay-any=0
 ```
 
 A WebUI in the module page lets you change patches later ("Save & re-patch").
@@ -112,6 +114,7 @@ SmaliPatcherReborn export module.zip
 
 - This modifies a system component. **Make a backup** and know how to recover before flashing.
 - If the phone fails to finish booting three times in a row, the module disables itself.
+- If the patched `services.jar` is missing or damaged (for example an install cut short by a power loss), the module disables itself instead of mounting it.
 - After a ROM update it disables itself until you re-patch (the patched jar only matches the build it was made on).
 - Uninstall from the app, or remove the module in your root manager. Magisk safe mode also works.
 - Mock-location and screenshot patches can violate the terms of some apps and games. Use them on your own devices and accounts, at your own risk.

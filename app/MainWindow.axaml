@@ -147,6 +147,17 @@
           <TextBlock Classes="dim" Text="Thank you to fOmey and sabpprook. This is a new implementation built on their idea; it is not affiliated with XDA Developers. MIT licence. Use at your own risk." />
         </StackPanel>
       </Border>
+
+      <!-- donate: hidden unless real wallet addresses were embedded at build time -->
+      <Border Name="DonateCard" Classes="card" IsVisible="False">
+        <Grid ColumnDefinitions="*,Auto">
+          <StackPanel VerticalAlignment="Center" Spacing="2" Margin="0,0,12,0">
+            <TextBlock Text="Support the project" FontWeight="SemiBold" />
+            <TextBlock Classes="dim" Text="Free and open source. If it saved you time, a small donation helps keep it maintained." />
+          </StackPanel>
+          <Button Name="DonateBtn" Grid.Column="1" Classes="accent" Content="Donate" MinWidth="110" VerticalAlignment="Center" />
+        </Grid>
+      </Border>
     </StackPanel>
   </ScrollViewer>
   </DockPanel>

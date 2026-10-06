@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.5.0-dev (unreleased)
+- New patch **Overlay any** (off by default): overlay apps can override any resource of their target on Android 11 to 17, and a differently signed overlay app can be installed on Android 13 to 17. Android 10 never restricted overlays this way, so the patch is skipped there. The signature check on Android 11 and 12 sits in a large method next to an unrelated security check, so it is left alone.
+- Safety: the boot guard now checks that the patched `services.jar` is present and is the file that was built, and disables the module if not. A crash loop in the system server never reboots the phone, so the three-failed-boots guard could not catch a damaged jar.
+- Desktop app: a **Donate** card at the bottom, and after every successful patch a short thank-you with the wallets and **Later** / **Never ask again** (Never is remembered). The Magisk WebUI has a compact **Donate** popup, never an automatic prompt. No donation UI is shown unless real wallet addresses were built in.
+
 ## v0.4.0-dev
 - Two more patches, all off by default: **High volume warning off** and **GNSS updates off**. They match on Android 10 to 17.
 - Install screen: a new question "Show the 2 extra options?" opens them. The WebUI and desktop app list them as switches.

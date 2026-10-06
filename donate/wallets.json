@@ -1,0 +1,7 @@
+{
+  "wallets": [
+    { "coin": "Bitcoin",    "ticker": "BTC",  "network": "Bitcoin network",     "address": "" },
+    { "coin": "Ethereum",   "ticker": "ETH",  "network": "Ethereum (ERC-20)",   "address": "" },
+    { "coin": "Tether USD", "ticker": "USDT", "network": "TRON network (TRC-20)", "address": "" }
+  ]
+}

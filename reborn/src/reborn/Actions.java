@@ -42,11 +42,15 @@ public final class Actions {
     }
 
     static boolean isInvokeOf(Instruction i, String targetDescriptor) {
+        return isInvokeMatching(i, d -> d.equals(targetDescriptor));
+    }
+
+    static boolean isInvokeMatching(Instruction i, java.util.function.Predicate<String> descriptor) {
         if (!(i instanceof ReferenceInstruction)) return false;
         if (!i.getOpcode().name.startsWith("invoke-")) return false;
         Object ref = ((ReferenceInstruction) i).getReference();
         return ref instanceof MethodReference
-                && ReferenceUtil.getMethodDescriptor((MethodReference) ref).equals(targetDescriptor);
+                && descriptor.test(ReferenceUtil.getMethodDescriptor((MethodReference) ref));
     }
 
     static List<Instruction> toList(Iterable<? extends Instruction> it) {
@@ -119,6 +123,12 @@ public final class Actions {
 
     /** After every call to targetDescriptor, overwrite the move-result register with a constant. */
     public static Action forceResult(Set<String> inMethods, String targetDescriptor, int value) {
+        return forceResultMatching(inMethods, d -> d.equals(targetDescriptor), targetDescriptor, value);
+    }
+
+    /** Same, for every call whose descriptor matches (a method that changed its parameter types across releases). */
+    public static Action forceResultMatching(Set<String> inMethods, java.util.function.Predicate<String> descriptor, String what, int value) {
+        final String targetDescriptor = what;
         return new Action() {
             @Override public boolean matches(Method m) {
                 return m.getImplementation() != null && (inMethods == null || inMethods.contains(m.getName()));
@@ -131,7 +141,7 @@ public final class Actions {
                 boolean changed = false;
                 for (int idx = 0; idx < src.size(); idx++) {
                     Instruction i = src.get(idx);
-                    boolean callThenResult = isInvokeOf(i, targetDescriptor) && idx + 1 < src.size()
+                    boolean callThenResult = isInvokeMatching(i, descriptor) && idx + 1 < src.size()
                             && src.get(idx + 1).getOpcode() == Opcode.MOVE_RESULT;
                     if (callThenResult) {
                         // The call itself may throw (AppOps SecurityException), so drop it and set the result directly.

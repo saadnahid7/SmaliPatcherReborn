@@ -39,8 +39,8 @@ choose_patches() {
   ui_print "   2 · Mock apps without dev setting  (default ON)"
   ui_print "   3 · Screenshots in secure windows  (default OFF)"
   ui_print ""
-  ui_print "   After these you can open 2 extra options (all default OFF):"
-  ui_print "   High volume warning · GNSS (GPS) updates off"
+  ui_print "   After these you can open 3 extra options (all default OFF):"
+  ui_print "   High volume warning · GNSS (GPS) updates off · Overlay any"
   ui_print ""
   ui_print "   Volume UP = YES      Volume DOWN = NO"
   ui_print "   Each question waits ${SECS} seconds, then keeps its default."
@@ -52,12 +52,13 @@ choose_patches() {
   ask 2 "Mock apps without developer setting" "Test providers work without picking a mock location app." y;   A2=$ANS
   ask 3 "Screenshots in secure windows" "Ignore FLAG_SECURE for screenshots and screen recording." n;   A3=$ANS
 
-  A4=n; A7=n
-  ask X "Show the 2 extra options?" "Vol+ opens them, Vol- skips them (they stay OFF)." n
+  A4=n; A7=n; A8=n
+  ask X "Show the 3 extra options?" "Vol+ opens them, Vol- skips them (they stay OFF)." n
   if [ "$ANS" = y ]; then
-    TOTAL=5
+    TOTAL=6
     ask 4 "High volume warning" "No safe-volume popup when raising headphone volume." n;   A4=$ANS
     ask 5 "GNSS updates off" "Real GPS fixes are ignored. Pair with a mock location app." n;   A7=$ANS
+    ask 6 "Overlay any" "Overlay apps can override any resource (Android 11+) and install without a matching signature (Android 13+). Advanced." n;   A8=$ANS
   fi
 
   mkdir -p "$CFG"
@@ -67,6 +68,7 @@ choose_patches() {
     [ "$A3" = y ] && echo "secure-flag=1" || echo "secure-flag=0"
     [ "$A4" = y ] && echo "high-volume=1" || echo "high-volume=0"
     [ "$A7" = y ] && echo "gnss-off=1" || echo "gnss-off=0"
+    [ "$A8" = y ] && echo "overlay-any=1" || echo "overlay-any=0"
   } > "$CFG/patches.conf"
 
   ui_print ""
@@ -76,6 +78,7 @@ choose_patches() {
   ui_print "  │  [$(onoff $A3)]  Screenshots in secure windows"
   ui_print "  │  [$(onoff $A4)]  High volume warning"
   ui_print "  │  [$(onoff $A7)]  GNSS updates off"
+  ui_print "  │  [$(onoff $A8)]  Overlay any"
   ui_print "  └──────────────────────────────────────────"
   ui_print ""
 }
