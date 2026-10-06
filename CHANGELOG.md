@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.5.0-dev (unreleased)
+## v0.5.0-dev
 - New patch **Overlay any** (off by default): overlay apps can override any resource of their target on Android 11 to 17, and a differently signed overlay app can be installed on Android 13 to 17. On Android 10 the restriction is decided in native code, so the patch changes nothing there and is skipped (tested). The signature check on Android 11 and 12 sits in a large method next to an unrelated security check, so it is left alone.
 - Patches that do not exist on the phone's Android version are never offered or applied: the install screen skips their question, the WebUI hides them, the desktop app grays them out, and the module drops them from an old config (and says so). If nothing applicable is left, the install is refused and nothing is changed. The patch list comes from the engine's own catalog, so the module, WebUI and app cannot disagree with it.
 - Fix: the desktop app reused an old extracted patch engine when a newer build had the same version number.

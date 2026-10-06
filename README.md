@@ -4,7 +4,7 @@ Patch your phone's own Android framework **on the phone**, as a Magisk / KernelS
 
 A desktop app (Windows, Linux, macOS) installs and manages it. The module can also be flashed on its own with no PC.
 
-> **Status: 0.3.2-dev, early release.** Tested on Android emulators and on two physical phones (below). Read [Safety](#safety) first.
+> **Status: 0.5.0-dev, early release.** Tested on Android emulators and on two physical phones (below). Read [Safety](#safety) first.
 
 ![Smali Patcher Reborn desktop app](docs/img/app-screenshots.png)
 
