@@ -45,6 +45,7 @@ else
   fi
 
   PATCHES=$(selected_patches)
+  report_skipped "$PATCHES"
   [ -n "$PATCHES" ] || abort "! No patch selected"
   ui_print ""
   ui_print "- Patches: $PATCHES"

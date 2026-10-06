@@ -23,7 +23,7 @@ Smali Patcher Reborn edits `services.jar` (the system server) on your device at 
 | **GNSS updates off** | Real GPS/GNSS fixes are ignored. Pair with a mock location app. |
 | **Overlay any** | Overlay apps can override any resource of their target (Android 11+), and a differently signed overlay app can be installed (Android 13+). Advanced. |
 
-The last three are off by default. During install, a fourth question opens them ("Show the 3 extra options?").
+Patches that do not exist on your Android version are hidden (install screen, WebUI) or grayed out (desktop app), and are never applied. The last three are off by default. During install, a fourth question opens them ("Show the 3 extra options?").
 
 ## Supported versions
 

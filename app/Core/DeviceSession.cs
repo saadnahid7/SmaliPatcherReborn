@@ -9,6 +9,10 @@ public sealed class PatchInfo
     public string Title { get; init; } = "";
     public string Description { get; init; } = "";
     public bool DefaultOn { get; init; }
+    /// <summary>First Android API level the patch exists on. Keep in step with minApi in reborn/src/reborn/Catalog.java.</summary>
+    public int MinApi { get; init; } = 29;
+    public bool AppliesTo(int api) => api >= MinApi;
+    public static PatchInfo? Find(string id) => All.FirstOrDefault(p => p.Id == id);
 
     public static readonly PatchInfo[] All =
     {
@@ -17,7 +21,7 @@ public sealed class PatchInfo
         new() { Id = "secure-flag", Title = "Allow screenshots in secure windows", Description = "Ignores FLAG_SECURE for screenshots and screen recording.", DefaultOn = false },
         new() { Id = "high-volume", Title = "High volume warning off", Description = "No safe-volume popup when raising headphone volume.", DefaultOn = false },
         new() { Id = "gnss-off", Title = "GNSS updates off", Description = "Real GPS fixes are ignored. Pair with a mock location app.", DefaultOn = false },
-        new() { Id = "overlay-any", Title = "Overlay any", Description = "Overlay apps can override any resource (Android 11+) and install without a matching signature (Android 13+). Advanced.", DefaultOn = false },
+        new() { Id = "overlay-any", MinApi = 30, Title = "Overlay any", Description = "Overlay apps can override any resource (Android 11+) and install without a matching signature (Android 13+). Advanced.", DefaultOn = false },
     };
 }
 
@@ -208,6 +212,15 @@ echo conf=$(sed -n 's/=1$//p' $C/patches.conf 2>/dev/null | tr '\n' ',')
     {
         var list = patches.ToList();
         if (list.Count == 0) { log("Select at least one patch."); return false; }
+        if (st.Api > 0)
+        {
+            foreach (var id in list.Where(i => PatchInfo.Find(i) is { } pi && !pi.AppliesTo(st.Api)).ToList())
+            {
+                log($"Skipping {id}: it does not exist on Android API {st.Api}.");
+                list.Remove(id);
+            }
+            if (list.Count == 0) { log($"None of the selected patches exist on Android API {st.Api}."); return false; }
+        }
         if (!st.RootOk) { log("No root access. Grant the shell superuser permission and try again."); return false; }
         if (st.Manager == "") { log("No Magisk, KernelSU or APatch found."); return false; }
         if (!st.SupportedApi) { log($"Android API {st.Api} is not supported (needs Android 10 / API 29 or newer)."); return false; }

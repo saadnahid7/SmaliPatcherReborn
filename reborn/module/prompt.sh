@@ -27,7 +27,22 @@ ask() {
 
 onoff() { [ "$1" = y ] && echo "ON " || echo "OFF"; }
 
+# row <on|off letter> <title> <id>: one line of the summary; patches that do not exist on this Android version say so
+row() {
+  if has "$3"; then ui_print "  │  [$(onoff $1)]  $2"; else ui_print "  │  [ -- ]  $2   (not on this Android version)"; fi
+}
+
+has() { case "$OK" in *" $1 "*) return 0 ;; esac; return 1; }
+
 choose_patches() {
+  # only what exists on this Android version is offered (the engine's catalog decides)
+  OK=" $(echo $(applicable_patches)) "
+  [ "$OK" = "  " ] && OK=" $ALL_PATCHES "
+  N=0; NAMES=""
+  if has high-volume; then N=$((N + 1)); NAMES="${NAMES:+$NAMES · }High volume warning"; fi
+  if has gnss-off; then N=$((N + 1)); NAMES="${NAMES:+$NAMES · }GNSS (GPS) updates off"; fi
+  if has overlay-any; then N=$((N + 1)); NAMES="${NAMES:+$NAMES · }Overlay any"; fi
+
   ui_print ""
   ui_print "  ╔════════════════════════════════════════╗"
   ui_print "  ║         CHOOSE YOUR PATCHES            ║"
@@ -39,9 +54,11 @@ choose_patches() {
   ui_print "   2 · Mock apps without dev setting  (default ON)"
   ui_print "   3 · Screenshots in secure windows  (default OFF)"
   ui_print ""
-  ui_print "   After these you can open 3 extra options (all default OFF):"
-  ui_print "   High volume warning · GNSS (GPS) updates off · Overlay any"
-  ui_print ""
+  if [ "$N" -gt 0 ]; then
+    ui_print "   After these you can open $N extra option$([ "$N" -gt 1 ] && echo s) (all default OFF):"
+    ui_print "   $NAMES"
+    ui_print ""
+  fi
   ui_print "   Volume UP = YES      Volume DOWN = NO"
   ui_print "   Each question waits ${SECS} seconds, then keeps its default."
   ui_print ""
@@ -53,12 +70,14 @@ choose_patches() {
   ask 3 "Screenshots in secure windows" "Ignore FLAG_SECURE for screenshots and screen recording." n;   A3=$ANS
 
   A4=n; A7=n; A8=n
-  ask X "Show the 3 extra options?" "Vol+ opens them, Vol- skips them (they stay OFF)." n
-  if [ "$ANS" = y ]; then
-    TOTAL=6
-    ask 4 "High volume warning" "No safe-volume popup when raising headphone volume." n;   A4=$ANS
-    ask 5 "GNSS updates off" "Real GPS fixes are ignored. Pair with a mock location app." n;   A7=$ANS
-    ask 6 "Overlay any" "Overlay apps can override any resource (Android 11+) and install without a matching signature (Android 13+). Advanced." n;   A8=$ANS
+  if [ "$N" -gt 0 ]; then
+    ask X "Show the $N extra option$([ "$N" -gt 1 ] && echo s)?" "Vol+ opens them, Vol- skips them (they stay OFF)." n
+    if [ "$ANS" = y ]; then
+      TOTAL=$((3 + N)); k=3
+      if has high-volume; then k=$((k + 1)); ask $k "High volume warning" "No safe-volume popup when raising headphone volume." n;   A4=$ANS; fi
+      if has gnss-off; then k=$((k + 1)); ask $k "GNSS updates off" "Real GPS fixes are ignored. Pair with a mock location app." n;   A7=$ANS; fi
+      if has overlay-any; then k=$((k + 1)); ask $k "Overlay any" "Overlay apps can override any resource (Android 11+) and install without a matching signature (Android 13+). Advanced." n;   A8=$ANS; fi
+    fi
   fi
 
   mkdir -p "$CFG"
@@ -76,9 +95,9 @@ choose_patches() {
   ui_print "  │  [$(onoff $A1)]  Hide mock-location flag"
   ui_print "  │  [$(onoff $A2)]  Mock apps without developer setting"
   ui_print "  │  [$(onoff $A3)]  Screenshots in secure windows"
-  ui_print "  │  [$(onoff $A4)]  High volume warning"
-  ui_print "  │  [$(onoff $A7)]  GNSS updates off"
-  ui_print "  │  [$(onoff $A8)]  Overlay any"
+  row "$A4" "High volume warning" high-volume
+  row "$A7" "GNSS updates off" gnss-off
+  row "$A8" "Overlay any" overlay-any
   ui_print "  └──────────────────────────────────────────"
   ui_print ""
 }

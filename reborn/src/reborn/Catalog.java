@@ -84,9 +84,11 @@ public final class Catalog {
                                 Actions.returnConst("checkSafeMediaVolume_l", "III", 0), false))));
 
         // Two gates keep arbitrary overlays out:
-        //  1. IdmapManager.enforceOverlayable (Android 11+; Android 10 does not enforce overlayables for these overlays,
-        //     so the patch would change nothing there): idmap2 only lets an overlay touch resources the
-        //     target marked overlayable. Forcing it false lifts that for every overlay.
+        //  1. IdmapManager.enforceOverlayable (Android 11+): idmap2 only lets an overlay that names an overlayable
+        //     touch the resources the target marked overlayable for it. Forcing it false lifts that for every overlay.
+        //     Not on Android 10: there that restriction is decided in native code and the flag changes nothing (tested
+        //     on the Android 10 emulator: an overlay with a targetName stays restricted with the patch, and one without
+        //     is unrestricted anyway), so the patch starts at Android 11.
         //  2. InstallPackageHelper.assertOverlayIsValid (Android 13+, a method of its own): an overlay signed
         //     differently from its target must declare targetName, and one targeting below Q must be platform
         //     signed. Every comparePackageSignatures inside it is one of those two checks, so they are forced to

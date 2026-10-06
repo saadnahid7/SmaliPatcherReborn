@@ -1,7 +1,9 @@
 # Changelog
 
 ## v0.5.0-dev (unreleased)
-- New patch **Overlay any** (off by default): overlay apps can override any resource of their target on Android 11 to 17, and a differently signed overlay app can be installed on Android 13 to 17. Android 10 never restricted overlays this way, so the patch is skipped there. The signature check on Android 11 and 12 sits in a large method next to an unrelated security check, so it is left alone.
+- New patch **Overlay any** (off by default): overlay apps can override any resource of their target on Android 11 to 17, and a differently signed overlay app can be installed on Android 13 to 17. On Android 10 the restriction is decided in native code, so the patch changes nothing there and is skipped (tested). The signature check on Android 11 and 12 sits in a large method next to an unrelated security check, so it is left alone.
+- Patches that do not exist on the phone's Android version are never offered or applied: the install screen skips their question, the WebUI hides them, the desktop app grays them out, and the module drops them from an old config (and says so). If nothing applicable is left, the install is refused and nothing is changed. The patch list comes from the engine's own catalog, so the module, WebUI and app cannot disagree with it.
+- Fix: the desktop app reused an old extracted patch engine when a newer build had the same version number.
 - Safety: the boot guard now checks that the patched `services.jar` is present and is the file that was built, and disables the module if not. A crash loop in the system server never reboots the phone, so the three-failed-boots guard could not catch a damaged jar.
 - Desktop app: a **Donate** card at the bottom, and after every successful patch a short thank-you with the wallets and **Later** / **Never ask again** (Never is remembered). The Magisk WebUI has a compact **Donate** popup, never an automatic prompt. No donation UI is shown unless real wallet addresses were built in.
 

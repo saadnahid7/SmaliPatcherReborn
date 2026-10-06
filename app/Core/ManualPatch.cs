@@ -113,10 +113,12 @@ public static class ManualPatch
         var dir = System.IO.Path.Combine(Adb.AppDataDir, "engine-" + asm.GetName().Version);
         Directory.CreateDirectory(dir);
         var jar = System.IO.Path.Combine(dir, "engine-pc.jar");
-        if (!File.Exists(jar) || new FileInfo(jar).Length == 0)
+        // Compare with the embedded copy, not just the version number: a rebuilt app with the same version must not run an older cached engine.
+        if (!File.Exists(jar) || new FileInfo(jar).Length != s.Length)
         {
-            using var f = File.Create(jar);
-            s.CopyTo(f);
+            var tmp = jar + ".tmp";
+            using (var f = File.Create(tmp)) s.CopyTo(f);
+            File.Move(tmp, jar, true);
         }
         return jar;
     }
@@ -141,6 +143,14 @@ public static class ManualPatch
         if (api == 0) return new Outcome(false, "Could not tell which Android version this is. Choose it in the list (a build.prop next to the jar would be detected automatically).");
         if (api < 29) return new Outcome(false, $"API {api} is not supported (Android 10 / API 29 or newer).");
         log($"Android API {api}");
+        var patchList = patches.ToList();
+        foreach (var id in patchList.Where(i => PatchInfo.Find(i) is { } pi && !pi.AppliesTo(api)).ToList())
+        {
+            log($"Skipping {id}: it does not exist on Android API {api}.");
+            patchList.Remove(id);
+        }
+        if (patchList.Count == 0) return new Outcome(false, $"None of the selected patches exist on Android API {api}.");
+        patches = patchList;
 
         var java = FindJava(javaPath);
         if (java == null) return new Outcome(false, "Java 17 or newer is needed for manual patching. Install one (for example Eclipse Temurin or Amazon Corretto 21), then try again. Patching straight on a rooted phone does not need Java.");

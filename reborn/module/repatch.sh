@@ -6,6 +6,7 @@ MODPATH=$MODDIR
 
 ensure_conf
 PATCHES=$(selected_patches)
+report_skipped "$PATCHES"
 [ -n "$PATCHES" ] || { echo "No patch selected"; exit 1; }
 echo "Patches: $PATCHES"
 find_source || exit 1

@@ -19,13 +19,32 @@ ensure_conf() {
   [ -f "$CFG/patches.conf" ] || printf '%s\n' "$DEFAULT_CONF" > "$CFG/patches.conf"
 }
 
+# The patches that exist on this Android version, asked from the engine's own catalog (the single source of truth).
+# Needs $MODPATH/bin/engine.jar. If the engine cannot be started, nothing is filtered here and the engine still skips what does not apply.
+applicable_patches() {
+  app_process -Djava.class.path="$MODPATH/bin/engine.jar" /system/bin reborn.Main list --api "$(getprop ro.build.version.sdk)" 2>/dev/null
+}
+
 selected_patches() {
-  local out="" p v
+  local out="" p v ok
+  ok=" $(echo $(applicable_patches)) "
+  [ "$ok" = "  " ] && ok=" $ALL_PATCHES "
   for p in $ALL_PATCHES; do
     v=$(sed -n "s/^$p=//p" "$CFG/patches.conf" 2>/dev/null | tail -n1)
-    [ "$v" = 1 ] && out="${out:+$out,}$p"
+    [ "$v" = 1 ] || continue
+    case "$ok" in *" $p "*) out="${out:+$out,}$p" ;; esac
   done
   echo "$out"
+}
+
+# Says which enabled patches were left out (called after selected_patches, which must stay silent: it runs inside $(...)).
+report_skipped() {
+  local sel=",$1," p v
+  for p in $ALL_PATCHES; do
+    v=$(sed -n "s/^$p=//p" "$CFG/patches.conf" 2>/dev/null | tail -n1)
+    [ "$v" = 1 ] || continue
+    case "$sel" in *",$p,"*) ;; *) say "- Skipping $p: it does not exist on this Android version" ;; esac
+  done
 }
 
 # Finds the ORIGINAL services.jar. A previously installed copy of this module is mounted over /system,

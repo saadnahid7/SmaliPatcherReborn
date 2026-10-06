@@ -22,7 +22,7 @@ public sealed class DonateDialog : Window
     {
         _afterPatch = afterPatch;
         Title = "Support Smali Patcher Reborn";
-        Width = 480; SizeToContent = SizeToContent.Height; CanResize = false;
+        Width = 520; SizeToContent = SizeToContent.Height; CanResize = false;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
         if (Application.Current?.TryFindResource("WindowBg", Application.Current.ActualThemeVariant, out var bg) == true) Background = bg as IBrush;
 

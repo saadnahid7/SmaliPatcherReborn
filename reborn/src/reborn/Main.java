@@ -30,6 +30,10 @@ public class Main {
                 if (!r.ok()) { r.errors.forEach(e -> System.err.println("ERROR: " + e)); System.exit(2); }
                 System.out.println("OK");
             }
+            case "list" -> {   // the patches that exist on this Android version, one id per line (the module and WebUI ask this)
+                int api = Integer.parseInt(o.getOrDefault("--api", "36"));
+                for (Patch p : Catalog.all().values()) if (p.appliesTo(api)) System.out.println(p.id);
+            }
             case "find" -> find(new File(o.get("--jar")), Pattern.compile(o.get("--re")), Integer.parseInt(o.getOrDefault("--api", "36")));
             case "baksmali" -> Class.forName("com.android.tools.smali.baksmali.Main").getMethod("main", String[].class)
                     .invoke(null, (Object) java.util.Arrays.copyOfRange(a, 1, a.length));
@@ -41,6 +45,7 @@ public class Main {
         System.out.println("""
                 smalipatcher-reborn engine
                   patch --in services.jar --out out.jar --api 36 [--patches mock-hide,mock-permission,secure-flag,high-volume,gnss-off,overlay-any]
+                  list  --api 36                                       (ids of the patches that apply to that Android version)
                   find  --jar services.jar --re <regex> [--api 36]     (matches Lclass;->method)
                   baksmali <baksmali args...>""");
     }

@@ -11,6 +11,7 @@ public partial class MainWindow : Window
 {
     readonly Adb _adb = new();
     readonly Dictionary<string, ToggleSwitch> _toggles = new();
+    readonly Dictionary<string, (Control Row, TextBlock Description)> _patchRows = new();
     List<AdbDevice> _devices = new();
     DeviceStatus? _status;
     DeviceSession? _session;
@@ -23,6 +24,7 @@ public partial class MainWindow : Window
     {
         AvaloniaXamlLoader_Load();
         BuildPatchList();
+        ApplyAvailability(0, "start");   // no phone and no chosen Android version yet: every patch stays available
         Wire();
         Opened += async (_, _) => await Startup();
         Opened += (_, _) =>   // test hook: fixed size/position for README screenshots
@@ -61,13 +63,31 @@ public partial class MainWindow : Window
             _toggles[p.Id] = t;
             var text = new StackPanel { Spacing = 1 };
             text.Children.Add(new TextBlock { Text = p.Title, FontWeight = Avalonia.Media.FontWeight.SemiBold });
-            text.Children.Add(new TextBlock { Text = p.Description, Opacity = 0.65, FontSize = 12, TextWrapping = Avalonia.Media.TextWrapping.Wrap });
+            var desc = new TextBlock { Text = p.Description, Opacity = 0.65, FontSize = 12, TextWrapping = Avalonia.Media.TextWrapping.Wrap };
+            text.Children.Add(desc);
             var row = new Grid { ColumnDefinitions = new ColumnDefinitions("*,Auto") };
             row.Children.Add(text);
             Grid.SetColumn(t, 1);
             row.Children.Add(t);
             list.Children.Add(row);
+            _patchRows[p.Id] = (row, desc);
         }
+    }
+
+    /// <summary>Grays out and switches off the patches that do not exist on this Android API level (0 = unknown: everything stays available).</summary>
+    void ApplyAvailability(int api, string who)
+    {
+        foreach (var p in PatchInfo.All)
+        {
+            var ok = api <= 0 || p.AppliesTo(api);
+            var (row, desc) = _patchRows[p.Id];
+            _toggles[p.Id].IsEnabled = ok;
+            if (!ok) _toggles[p.Id].IsChecked = false;
+            row.Opacity = ok ? 1 : 0.45;
+            desc.Text = ok ? p.Description : $"Not available on Android API {api} (needs API {p.MinApi}+).";
+        }
+        if (Environment.GetEnvironmentVariable("SPR_UI_TEST_LOG") is { Length: > 0 } log)   // test hook
+            try { File.AppendAllText(log, $"avail {who} api={api}: " + string.Join(" ", PatchInfo.All.Select(p => $"{p.Id}={(_toggles[p.Id].IsEnabled ? "on" : "off")}")) + "\n"); } catch { }
     }
 
     void Wire()
@@ -84,6 +104,9 @@ public partial class MainWindow : Window
         var apiBox = C<ComboBox>("ManualApi");
         apiBox.ItemsSource = ManualPatch.AndroidVersions.Select(v => v.Label).ToList();
         apiBox.SelectedIndex = 0;
+        apiBox.SelectionChanged += (_, _) => { if (_status == null) ApplyAvailability(ManualApiSelected(), "manual"); };
+        if (int.TryParse(Environment.GetEnvironmentVariable("SPR_MANUAL_API"), out var testApi))   // test hook: choose the Android version without clicking
+            apiBox.SelectedIndex = Math.Max(0, ManualPatch.AndroidVersions.ToList().FindIndex(v => v.Api == testApi));
         C<Button>("ManualFolderBtn").Click += async (_, _) => await PickManual(folder: true);
         C<Button>("ManualFileBtn").Click += async (_, _) => await PickManual(folder: false);
         C<Button>("ManualGoBtn").Click += async (_, _) => await DoManual();
@@ -248,7 +271,7 @@ public partial class MainWindow : Window
         if (st.Api > 0 && st.ModuleInstalled)
         {
             foreach (var p in PatchInfo.All)
-                _toggles[p.Id].IsChecked = st.ConfPatches.Split(',').Contains(p.Id);
+                if (_toggles[p.Id].IsEnabled) _toggles[p.Id].IsChecked = st.ConfPatches.Split(',').Contains(p.Id);   // never re-tick a patch this Android lacks
         }
     }
 
@@ -258,10 +281,12 @@ public partial class MainWindow : Window
         if (s == null)
         {
             foreach (var n in new[] { "LDevice", "LAndroid", "LRoot", "LJar", "LModule", "LBuild" }) Set(n, "-");
+            ApplyAvailability(ManualApiSelected(), "manual");   // no phone: the Android version chosen for manual patching decides
             if (dev != null) Set("LDevice", dev.ToString());
             UpdateButtons();
             return;
         }
+        ApplyAvailability(s.Api, "device");
         Set("LDevice", $"{s.Brand} {s.Model}   {s.Serial}".Trim());
         Set("LAndroid", $"Android {s.Release}  (API {s.Api}){(s.SupportedApi ? "" : "  - not supported, needs Android 10+")}");
         Set("LRoot", !s.RootOk ? "No root access. Install Magisk, KernelSU or APatch and grant the shell permission."
@@ -282,7 +307,9 @@ public partial class MainWindow : Window
 
     static string Pretty(string m) => m switch { "magisk" => "Magisk", "ksu" => "KernelSU", "apatch" => "APatch", _ => m };
 
-    IEnumerable<string> SelectedPatches() => PatchInfo.All.Where(p => _toggles[p.Id].IsChecked == true).Select(p => p.Id);
+    int ManualApiSelected() => ManualPatch.AndroidVersions[Math.Max(0, C<ComboBox>("ManualApi").SelectedIndex)].Api;
+
+    IEnumerable<string> SelectedPatches() => PatchInfo.All.Where(p => _toggles[p.Id].IsEnabled && _toggles[p.Id].IsChecked == true).Select(p => p.Id);
 
     async Task ConnectWifi()
     {

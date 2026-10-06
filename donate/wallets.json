@@ -1,7 +1,8 @@
 {
   "wallets": [
-    { "coin": "Bitcoin",    "ticker": "BTC",  "network": "Bitcoin network",     "address": "" },
-    { "coin": "Ethereum",   "ticker": "ETH",  "network": "Ethereum (ERC-20)",   "address": "" },
-    { "coin": "Tether USD", "ticker": "USDT", "network": "TRON network (TRC-20)", "address": "" }
+    { "coin": "Bitcoin",    "ticker": "BTC",  "network": "Bitcoin network",   "address": "16Cbj8TBGftdopodQ2F1L4ct3NVj3K8yht" },
+    { "coin": "Tether USD", "ticker": "USDT", "network": "Ethereum (ERC-20)", "address": "0x6f7d839796035e08fd03f53782f6aff992a72077" },
+    { "coin": "Tether USD", "ticker": "USDT", "network": "TRON (TRC-20)",     "address": "THTsPzTPeVLk8dXRgtEuinxoWKx3FhyPBW" },
+    { "coin": "Tether USD", "ticker": "USDT", "network": "Solana",            "address": "A2s5jg7ED7u9rQxf1xVSFGvQQn55mx6FNY3ymSbkWFqR" }
   ]
 }
