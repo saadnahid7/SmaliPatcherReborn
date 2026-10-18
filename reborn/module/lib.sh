@@ -47,6 +47,29 @@ report_skipped() {
   done
 }
 
+# KernelSU has no mirror of /system. Mounting the system partition a second time (read-only) shows the jar the active
+# module hides; copy it out and unmount at once. Sets SRC to the copy ($CFG/orig-services.jar, removed after patching).
+raw_source() {
+  local mp dev typ d="$CFG/.rawmnt" out="$CFG/orig-services.jar" f
+  mkdir -p "$CFG"
+  for mp in /system /; do
+    set -- $(awk -v m="$mp" '$2==m{print $1, $3; exit}' /proc/mounts)
+    dev=$1; typ=$2
+    [ -b "$dev" ] || continue
+    mkdir -p "$d"
+    mount -t "$typ" -o ro "$dev" "$d" 2>/dev/null || continue
+    for f in "$d/system/framework/services.jar" "$d/framework/services.jar"; do
+      if [ -f "$f" ] && cp "$f" "$out"; then
+        umount "$d" 2>/dev/null; rmdir "$d" 2>/dev/null
+        if cmp -s "$out" "$LIVE/system/framework/services.jar"; then rm -f "$out"; return 1; fi
+        SRC="$out"; return 0
+      fi
+    done
+    umount "$d" 2>/dev/null; rmdir "$d" 2>/dev/null
+  done
+  return 1
+}
+
 # Finds the ORIGINAL services.jar. A previously installed copy of this module is mounted over /system,
 # so prefer the root manager's untouched mirror of the system partition.
 find_source() {
@@ -62,6 +85,7 @@ find_source() {
   [ -n "$SRC" ] || return 1
   if [ "$SRC" = /system/framework/services.jar ] && [ -f "$LIVE/system/framework/services.jar" ] && [ ! -f "$LIVE/disable" ] \
      && cmp -s "$LIVE/system/framework/services.jar" "$SRC"; then
+    raw_source && return 0
     say "! Original services.jar is hidden behind the active module (no mirror available)."
     say "! Disable the module, reboot, then patch again."
     return 2
@@ -109,6 +133,7 @@ run_patch() {
     return 1
   fi
   mv -f "$out.new" "$out"
+  [ "$SRC" = "$CFG/orig-services.jar" ] && rm -f "$SRC"
 
   finish_module "$patches" || return 1
   return 0

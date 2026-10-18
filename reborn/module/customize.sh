@@ -56,6 +56,7 @@ else
 
 fi
 
+rm -f "$CFG/orig-services.jar"
 set_perm_recursive "$MODPATH" 0 0 0755 0644
 ui_print ""
 ui_print "- Done. Reboot to apply."
