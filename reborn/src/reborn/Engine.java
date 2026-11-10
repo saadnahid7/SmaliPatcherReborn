@@ -75,7 +75,12 @@ public final class Engine {
             }
 
             for (String name : dexNames) {
-                DexFile dex = DexFileFactory.loadDexEntry(inJar, name, true, opcodes).getDexFile();
+                // Read the entry bytes and build the dex directly. DexFileFactory.loadDexEntry()'s zip container does not
+                // recognise dex version 041 (the Android 15+ dex-container format Samsung One UI ships), so it would report
+                // the entry as missing; DexBackedDexFile reads 035 through 041 from the raw bytes.
+                byte[] dexBytes;
+                try (InputStream dis = zip.getInputStream(zip.getEntry(name))) { dexBytes = dis.readAllBytes(); }
+                DexFile dex = new DexBackedDexFile(opcodes, dexBytes);
                 boolean has = false;
                 for (ClassDef c : dex.getClasses()) {
                     if (candidates.contains(c.getType())) { has = true; break; }

@@ -27,6 +27,7 @@ public final class Catalog {
                 L(
                         new Patch.Step("MockLocationProvider", L(
                                 "Lcom/android/server/location/provider/MockLocationProvider;",
+                                "Lcom/android/server/location/provider/MockableLocationProvider;",
                                 "Lcom/android/server/location/MockProvider;",
                                 "Lcom/android/server/location/MockLocationProvider;"),
                                 Actions.nopInvoke(null, SET_MOCK), false),
@@ -39,10 +40,16 @@ public final class Catalog {
                 "Apps can register test providers without being selected as the mock location app", 28, 99,
                 L("testProviderAppOp", "canCallerAccessMockLocation", "noteMockLocationAccess"),
                 L(
+                        // The AppOps gate changed shape across ROMs: AOSP calls AppOpsHelper.noteOp(int, CallerIdentity),
+                        // Samsung One UI calls the concrete SystemAppOpsHelper.noteOp(CallerIdentity) with no op-code arg.
+                        // Match any *AppOpsHelper.noteOp(...CallerIdentity)Z so both are covered.
                         new Patch.Step("testProviderAppOp", L(
                                 "Lcom/android/server/location/LocationManagerService;"),
-                                Actions.forceResult(S("addTestProvider", "removeTestProvider",
-                                        "setTestProviderEnabled", "setTestProviderLocation"), APPOPS_NOTEOP, 1), false),
+                                Actions.forceResultMatching(S("addTestProvider", "removeTestProvider",
+                                        "setTestProviderEnabled", "setTestProviderLocation"),
+                                        d -> d.contains("AppOpsHelper;->noteOp(")
+                                                && d.endsWith("Landroid/location/util/identity/CallerIdentity;)Z"),
+                                        APPOPS_NOTEOP, 1), false),
                         new Patch.Step("canCallerAccessMockLocation", L(
                                 "Lcom/android/server/LocationManagerService;",
                                 "Lcom/android/server/location/LocationManagerService;"),
