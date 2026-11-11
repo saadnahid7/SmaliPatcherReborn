@@ -116,7 +116,7 @@ public final class Catalog {
 
         m.put("gnss-off", new Patch("gnss-off",
                 "Real GPS/GNSS location updates are ignored", 28, 99,
-                L("reportLocation", "onReportLocation"),
+                L("reportLocation", "onReportLocation", "halReportLocation"),
                 L(
                         new Patch.Step("reportLocation", L(
                                 "Lcom/android/server/location/GnssLocationProvider;",
@@ -124,7 +124,14 @@ public final class Catalog {
                                 Actions.returnConst("reportLocation", "ZLandroid/location/Location;", 0), false),
                         new Patch.Step("onReportLocation", L(
                                 "Lcom/android/server/location/gnss/GnssLocationProvider;"),
-                                Actions.returnConst("onReportLocation", "ZLandroid/location/Location;", 0), false))));
+                                Actions.returnConst("onReportLocation", "ZLandroid/location/Location;", 0), false),
+                        // GnssNative.reportLocation(boolean, Location) is the JNI callback the HAL calls by name, so R8
+                        // cannot rename it - stable across OEM builds. On Android 12+ (GnssNative) the per-provider
+                        // callback above may be desugared into a synthetic lambda (Samsung One UI), so drop the fix here
+                        // at the HAL boundary instead; GNSS-only, leaves network/fused location untouched.
+                        new Patch.Step("halReportLocation", L(
+                                "Lcom/android/server/location/gnss/hal/GnssNative;"),
+                                Actions.returnConst("reportLocation", "ZLandroid/location/Location;", 0), false))));
         return m;
     }
 
