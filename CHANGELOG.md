@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.5.1-dev
+- Samsung One UI (Android 15) support. **Hide mock-location flag** and **Mock apps without developer setting** now match One UI's rearranged location code (the mock flag is set in `MockableLocationProvider`, and the app-op check is `SystemAppOpsHelper.noteOp` with no op-code argument). Before this, patching a Samsung device failed with "none of ... matched on this ROM".
+- The patch engine now reads the Android 15+ dex container format (dex version 041) that One UI ships; previously it reported "no classes.dex" and refused the jar.
+- **GNSS updates off** now also works on Android 12 and newer (including One UI), by switching off real fixes at the GNSS HAL callback (`GnssNative.reportLocation`). On those builds the old per-provider method is compiled away, so the previous approach matched nothing.
+- Not fixed on Samsung: **Allow screenshots in secure windows** — One UI keeps the WindowManager code in a separate file, not in `services.jar`, so there is nothing here to patch for it.
+
 ## v0.5.0-dev
 - New patch **Overlay any** (off by default): overlay apps can override any resource of their target on Android 11 to 17, and a differently signed overlay app can be installed on Android 13 to 17. On Android 10 the restriction is decided in native code, so the patch changes nothing there and is skipped (tested). The signature check on Android 11 and 12 sits in a large method next to an unrelated security check, so it is left alone.
 - Patches that do not exist on the phone's Android version are never offered or applied: the install screen skips their question, the WebUI hides them, the desktop app grays them out, and the module drops them from an old config (and says so). If nothing applicable is left, the install is refused and nothing is changed. The patch list comes from the engine's own catalog, so the module, WebUI and app cannot disagree with it.
